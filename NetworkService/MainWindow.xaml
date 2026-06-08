@@ -5,61 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkService"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="600" MinWidth="1200" >
+        Title="MainWindow"
+        MinHeight="600"
+        MinWidth="1200"
+        Background="#E8E8E8">
 
     <Window.Resources>
 
-        <Style TargetType="{x:Type Button}" x:Key="Type1">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="0,5"/>
-            <Setter Property="Width" Value="180"/>
-            <Setter Property="Margin" Value="10,5"/>
-            <Setter Property="BorderBrush" Value="Gray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}">
-
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder"
-                                        Property="Background"
-                                        Value="#E7E7E7"/>
-                                <Setter Property="BorderThickness"
-                                        Value="2"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="{x:Type TextBlock}" x:Key="SideBarBtnText">
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,16,0"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontFamily" Value="Courier New"/>
-        </Style>
-
-        <Style TargetType="{x:Type TextBlock}" x:Key="TabGroupDescription">
-            <Setter Property="FontFamily" Value="Courier New"/>
-            <Setter Property="FontWeight" Value="DemiBold"/>
-            <Setter Property="Foreground" Value="#444"/>
-        </Style>
-
+        <!-- HEADER TEXT -->
         <Style TargetType="{x:Type TextBlock}" x:Key="HeaderText">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Courier New"/>
@@ -68,328 +21,506 @@
             <Setter Property="FontWeight" Value="DemiBold"/>
         </Style>
 
+        <!-- GROUP LABEL -->
+        <Style TargetType="{x:Type TextBlock}" x:Key="TabGroupDescription">
+            <Setter Property="FontFamily" Value="Courier New"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+            <Setter Property="Foreground" Value="#444"/>
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+
+        <!-- TABCONTROL BEZ GORNJIH TABOVA -->
+        <Style TargetType="{x:Type TabControl}" x:Key="ContentOnlyTabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+
+                            <ContentPresenter x:Name="PART_SelectedContentHost"
+                                      Content="{TemplateBinding SelectedContent}"
+                                      ContentTemplate="{TemplateBinding SelectedContentTemplate}"
+                                      ContentTemplateSelector="{TemplateBinding SelectedContentTemplateSelector}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Margin="0"/>
+
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- NAV RADIO BUTTON: ENTITIES / DISPLAY / GRAPH -->
+        <Style TargetType="{x:Type RadioButton}" x:Key="SideNavRadioButton">
+            <Setter Property="FontFamily" Value="Courier New"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#222"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="10,4"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <Border x:Name="MainBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7">
+
+                            <Grid Margin="16,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{TemplateBinding Content}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontFamily="{TemplateBinding FontFamily}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           VerticalAlignment="Center"/>
+
+                                <Border x:Name="ShortcutBorder"
+                                        Grid.Column="1"
+                                        BorderBrush="{TemplateBinding Foreground}"
+                                        BorderThickness="1.5"
+                                        CornerRadius="5"
+                                        Padding="8,4"
+                                        VerticalAlignment="Center">
+
+                                    <TextBlock Text="{TemplateBinding Tag}"
+                                               Foreground="{TemplateBinding Foreground}"
+                                               FontFamily="Courier New"
+                                               FontSize="18"
+                                               FontWeight="DemiBold"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#111"/>
+                                <Setter TargetName="MainBorder" Property="BorderBrush" Value="#111"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MainBorder" Property="BorderThickness" Value="3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- COMMAND BUTTON: BACK / UNDO / SHORTCUTS / TERMINAL -->
+        <Style TargetType="{x:Type Button}" x:Key="SideCommandButton">
+            <Setter Property="FontFamily" Value="Courier New"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#222"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="10,4"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="MainBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7">
+
+                            <Grid Margin="16,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{TemplateBinding Content}"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontFamily="{TemplateBinding FontFamily}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           VerticalAlignment="Center"/>
+
+                                <Border Grid.Column="1"
+                                        BorderBrush="#333"
+                                        BorderThickness="1.5"
+                                        CornerRadius="5"
+                                        Padding="8,4"
+                                        VerticalAlignment="Center">
+
+                                    <TextBlock Text="{TemplateBinding Tag}"
+                                               Foreground="#333"
+                                               FontFamily="Courier New"
+                                               FontSize="18"
+                                               FontWeight="DemiBold"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#E7E7E7"/>
+                                <Setter TargetName="MainBorder" Property="BorderThickness" Value="3"/>
+                            </Trigger>
+
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="MainBorder" Property="Background" Value="#D0D0D0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
 
         <!-- HEADER -->
         <StackPanel Grid.Row="0"
-                    Background="Black"
+                    Background="#111"
                     Orientation="Horizontal"
                     VerticalAlignment="Stretch">
 
             <Border BorderThickness="2"
                     BorderBrush="White"
                     Margin="16"
-                    Padding="2"
-                    CornerRadius="3"
+                    Padding="4"
+                    CornerRadius="5"
                     VerticalAlignment="Center">
 
                 <TextBlock Style="{StaticResource HeaderText}"
                            Margin="0"
+                           FontSize="24"
                            FontWeight="Black">
                     NS
                 </TextBlock>
             </Border>
 
-            <TextBlock Style="{StaticResource HeaderText}">
+            <TextBlock Style="{StaticResource HeaderText}"
+                       FontSize="24"
+                       FontWeight="Black"
+                       VerticalAlignment="Center">
                 NetworkService
             </TextBlock>
 
-            <TextBlock Style="{StaticResource HeaderText}">
+            <TextBlock Style="{StaticResource HeaderText}"
+                       FontSize="22"
+                       VerticalAlignment="Center">
                 · DER Monitoring
             </TextBlock>
 
-            <TextBlock Style="{StaticResource HeaderText}">
+            <TextBlock Style="{StaticResource HeaderText}"
+                       FontSize="22"
+                       VerticalAlignment="Center">
                 · CG2/T4/G2/P1
             </TextBlock>
-
-            <Border BorderBrush="White"
-                    CornerRadius="14"
-                    BorderThickness="2"
-                    VerticalAlignment="Center"
-                    Padding="5"
-                    Margin="150,0,0,0">
-
-                <TextBlock Style="{StaticResource HeaderText}"
-                           Margin="0"
-                           FontSize="14">
-                    ◉ log.txt WRITTING
-                </TextBlock>
-            </Border>
-
-            <Border BorderBrush="White"
-                    CornerRadius="14"
-                    BorderThickness="2"
-                    VerticalAlignment="Center"
-                    Padding="5"
-                    Margin="15,0,0,0">
-
-                <TextBlock Style="{StaticResource HeaderText}"
-                           Margin="0"
-                           FontSize="14">
-                    RT feed: ON
-                </TextBlock>
-            </Border>
-
-            <Border BorderBrush="White"
-                    CornerRadius="14"
-                    BorderThickness="2"
-                    VerticalAlignment="Center"
-                    Padding="5"
-                    Margin="15,0,0,0">
-
-                <TextBlock Style="{StaticResource HeaderText}"
-                           Margin="0"
-                           FontSize="14">
-                    Palette: grayscale only
-                </TextBlock>
-            </Border>
 
         </StackPanel>
 
 
-        <!-- MAIN CONTENT -->
-        <TabControl Grid.Row="1"
-                    TabStripPlacement="Left"
-                    VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    Background="Red"
-                    SelectionChanged="TabControl_SelectionChanged">
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <TextBlock Style="{StaticResource TabGroupDescription}"
-                                   Margin="12,15,0,0">
-                            VIEWS / KEYBOARD-FIRST
-                        </TextBlock>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
+        <!-- BODY -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
 
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Name="PART_Header" Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
+            <!-- LEFT SIDEBAR -->
+            <Border Grid.Column="0"
+                    Background="#E4E4E4"
+                    BorderBrush="#111"
+                    BorderThickness="0,0,2,0">
 
-                                    <TextBlock Text="Entities"
-                                               Style="{StaticResource SideBarBtnText}"/>
+                <StackPanel Margin="0,22,0,0">
 
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
+                    <TextBlock Style="{StaticResource TabGroupDescription}"
+                               Margin="22,0,0,8">
+                        VIEWS / KEYBOARD-FIRST
+                    </TextBlock>
 
-                                        <TextBlock Text="Alt + 1"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
+                    <RadioButton x:Name="EntitiesNav"
+                                 Style="{StaticResource SideNavRadioButton}"
+                                 GroupName="MainViews"
+                                 Content="Entities"
+                                 Tag="Alt+1"
+                                 IsChecked="True"
+                                 Checked="EntitiesNav_Checked"/>
 
+                    <RadioButton x:Name="DisplayNav"
+                                 Style="{StaticResource SideNavRadioButton}"
+                                 GroupName="MainViews"
+                                 Content="Display"
+                                 Tag="Alt+2"
+                                 Checked="DisplayNav_Checked"/>
+
+                    <RadioButton x:Name="GraphNav"
+                                 Style="{StaticResource SideNavRadioButton}"
+                                 GroupName="MainViews"
+                                 Content="Graph"
+                                 Tag="Alt+3"
+                                 Checked="GraphNav_Checked"/>
+
+
+                    <TextBlock Style="{StaticResource TabGroupDescription}"
+                               Margin="22,18,0,8">
+                        GLOBAL ACTIONS
+                    </TextBlock>
+
+                    <Button Style="{StaticResource SideCommandButton}"
+                            Content="Back"
+                            Tag="Esc"
+                            Click="BackButton_Click"/>
+
+                    <Button Style="{StaticResource SideCommandButton}"
+                            Content="Undo"
+                            Tag="Ctrl+Z"
+                            Click="UndoButton_Click"/>
+
+                    <Button Style="{StaticResource SideCommandButton}"
+                            Content="Shortcuts"
+                            Tag="F1"
+                            Click="ShortcutsButton_Click"/>
+
+                    <Button Style="{StaticResource SideCommandButton}"
+                            Content="Terminal"
+                            Tag="Ctrl+`"
+                            Click="TerminalButton_Click"/>
+
+                </StackPanel>
+            </Border>
+
+
+            <!-- RIGHT CONTENT -->
+            <TabControl x:Name="MainTabs"
+                        Grid.Column="1"
+                        Style="{StaticResource ContentOnlyTabControl}"
+                        Background="#F4F4F4"
+                        BorderThickness="0"
+                        SelectedIndex="0" SelectionChanged="MainTabs_SelectionChanged">
+
+                <!-- ENTITIES UI -->
+                <TabItem>
+                    <Grid Background="White">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0"
+      Margin="25,25,25,0">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- LEFT TITLE TEXT -->
+                            <StackPanel Grid.Column="0"
+                VerticalAlignment="Center">
+
+                                <TextBlock Text="Network Entities View"
+                   FontFamily="Courier New"
+                   FontSize="26"
+                   FontWeight="DemiBold"
+                   Foreground="Black"/>
+
+                                <TextBlock Text="Table, inline validation, P1 search, P2 filter, add/delete DER entities"
+                   FontFamily="Courier New"
+                   FontSize="13"
+                   FontWeight="Normal"
+                   Foreground="#555555"/>
+                            </StackPanel>
+
+
+                            <!-- RIGHT BUTTONS -->
+                            <StackPanel Grid.Column="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center">
+
+                                <!-- CLEAR FILTERS -->
+                                <Button Width="160"
+                Height="45"
+                Margin="0,0,10,0"
+                Background="#F4F4F4"
+                BorderBrush="#222"
+                BorderThickness="1.5"
+                Foreground="Black"
+                Cursor="Hand">
+
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="7">
+                                                <ContentPresenter HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+
+                                    <Grid Margin="10,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                           Text="Clear filters"
+                           FontFamily="Arial"
+                           FontSize="16"
+                           Foreground="Black"
+                           VerticalAlignment="Center"/>
+
+                                        <Border Grid.Column="1"
+                        BorderBrush="#333"
+                        BorderThickness="1.5"
+                        CornerRadius="4"
+                        Padding="5,2"
+                        VerticalAlignment="Center">
+
+                                            <TextBlock Text="Alt+C"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="#333"/>
+                                        </Border>
+                                    </Grid>
+                                </Button>
+
+
+                                <!-- ADD ENTITY -->
+                                <Button Width="145"
+                Height="45"
+                Background="#111"
+                BorderBrush="#111"
+                BorderThickness="1.5"
+                Foreground="White"
+                Cursor="Hand">
+
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="7">
+                                                <ContentPresenter HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+
+                                    <Grid Margin="10,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                           Text="Add entity"
+                           FontFamily="Arial"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+
+                                        <Border Grid.Column="1"
+                        BorderBrush="White"
+                        BorderThickness="1.5"
+                        CornerRadius="4"
+                        Padding="5,2"
+                        VerticalAlignment="Center">
+
+                                            <TextBlock Text="Alt+A"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                                        </Border>
+                                    </Grid>
+                                </Button>
+
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="25 25 25 0">
+                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="8" Width="170" Height="85">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                                    <TextBlock Text="Total Entities" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
                                 </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Name="PART_Header" Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="Display"
-                                               Style="{StaticResource SideBarBtnText}"/>
-
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="Alt + 2"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
+                            </Border>
+                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                                    <TextBlock Text="TVALID 1-5 MW" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
                                 </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Name="PART_Header" Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="Graph"
-                                               Style="{StaticResource SideBarBtnText}"/>
-
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="Alt + 3"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
+                            </Border>
+                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                                    <TextBlock Text="INVALID ALERTS" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
                                 </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <TextBlock Style="{StaticResource TabGroupDescription}"
-                                   Margin="12,30,0,0">
-                            GLOBAL ACTIONS
-                        </TextBlock>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="Back"
-                                               Style="{StaticResource SideBarBtnText}"/>
-
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="Esc"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
+                            </Border>
+                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                                    <TextBlock Text="LAST VALUES SHOWN" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
                                 </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
 
 
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="Undo"
-                                               Style="{StaticResource SideBarBtnText}"/>
-
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="Ctrl + Z"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
-                                </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
+                <!-- DISPLAY UI -->
+                <TabItem>
+                    <Grid Background="White">
+                        <TextBlock Text="DISPLAY UI"
+                                   FontFamily="Courier New"
+                                   FontSize="44"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </TabItem>
 
 
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
+                <!-- GRAPH UI -->
+                <TabItem>
+                    <Grid Background="White">
+                        <TextBlock Text="GRAPH UI"
+                                   FontFamily="Courier New"
+                                   FontSize="44"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </TabItem>
 
-                                    <TextBlock Text="Shortcuts"
-                                               Style="{StaticResource SideBarBtnText}"/>
+            </TabControl>
 
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="F1"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
-                                </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-
-            <TabItem>
-                <TabItem.Template>
-                    <ControlTemplate>
-                        <Border Margin="4,0,1,1">
-                            <Button Style="{StaticResource Type1}">
-                                <StackPanel Orientation="Horizontal"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-
-                                    <TextBlock Text="Terminal"
-                                               Style="{StaticResource SideBarBtnText}"/>
-
-                                    <Border BorderBrush="Black"
-                                            BorderThickness="1"
-                                            CornerRadius="4"
-                                            Padding="7,4">
-
-                                        <TextBlock Text="Ctrl + `"
-                                                   VerticalAlignment="Center"/>
-                                    </Border>
-
-                                </StackPanel>
-                            </Button>
-                        </Border>
-                    </ControlTemplate>
-                </TabItem.Template>
-            </TabItem>
-
-        </TabControl>
-
+        </Grid>
     </Grid>
 </Window>
