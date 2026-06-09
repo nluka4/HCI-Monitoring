@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkService"
+        xmlns:views="clr-namespace:NetworkService.Views"
         mc:Ignorable="d"
         Title="MainWindow"
         MinHeight="600"
@@ -322,187 +323,13 @@
 
                 <!-- ENTITIES UI -->
                 <TabItem>
-                    <Grid Background="White">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid Grid.Row="0"
-      Margin="25,25,25,0">
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- LEFT TITLE TEXT -->
-                            <StackPanel Grid.Column="0"
-                VerticalAlignment="Center">
-
-                                <TextBlock Text="Network Entities View"
-                   FontFamily="Courier New"
-                   FontSize="26"
-                   FontWeight="DemiBold"
-                   Foreground="Black"/>
-
-                                <TextBlock Text="Table, inline validation, P1 search, P2 filter, add/delete DER entities"
-                   FontFamily="Courier New"
-                   FontSize="13"
-                   FontWeight="Normal"
-                   Foreground="#555555"/>
-                            </StackPanel>
-
-
-                            <!-- RIGHT BUTTONS -->
-                            <StackPanel Grid.Column="1"
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center">
-
-                                <!-- CLEAR FILTERS -->
-                                <Button Width="160"
-                Height="45"
-                Margin="0,0,10,0"
-                Background="#F4F4F4"
-                BorderBrush="#222"
-                BorderThickness="1.5"
-                Foreground="Black"
-                Cursor="Hand">
-
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="7">
-                                                <ContentPresenter HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-
-                                    <Grid Margin="10,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock Grid.Column="0"
-                           Text="Clear filters"
-                           FontFamily="Arial"
-                           FontSize="16"
-                           Foreground="Black"
-                           VerticalAlignment="Center"/>
-
-                                        <Border Grid.Column="1"
-                        BorderBrush="#333"
-                        BorderThickness="1.5"
-                        CornerRadius="4"
-                        Padding="5,2"
-                        VerticalAlignment="Center">
-
-                                            <TextBlock Text="Alt+C"
-                               FontFamily="Courier New"
-                               FontSize="11"
-                               FontWeight="Bold"
-                               Foreground="#333"/>
-                                        </Border>
-                                    </Grid>
-                                </Button>
-
-
-                                <!-- ADD ENTITY -->
-                                <Button Width="145"
-                Height="45"
-                Background="#111"
-                BorderBrush="#111"
-                BorderThickness="1.5"
-                Foreground="White"
-                Cursor="Hand">
-
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="7">
-                                                <ContentPresenter HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-
-                                    <Grid Margin="10,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock Grid.Column="0"
-                           Text="Add entity"
-                           FontFamily="Arial"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           Foreground="White"
-                           VerticalAlignment="Center"/>
-
-                                        <Border Grid.Column="1"
-                        BorderBrush="White"
-                        BorderThickness="1.5"
-                        CornerRadius="4"
-                        Padding="5,2"
-                        VerticalAlignment="Center">
-
-                                            <TextBlock Text="Alt+A"
-                               FontFamily="Courier New"
-                               FontSize="11"
-                               FontWeight="Bold"
-                               Foreground="White"/>
-                                        </Border>
-                                    </Grid>
-                                </Button>
-
-                            </StackPanel>
-                        </Grid>
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="25 25 25 0">
-                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="8" Width="170" Height="85">
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
-                                    <TextBlock Text="Total Entities" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
-                                </StackPanel>
-                            </Border>
-                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
-                                    <TextBlock Text="TVALID 1-5 MW" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
-                                </StackPanel>
-                            </Border>
-                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
-                                    <TextBlock Text="INVALID ALERTS" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
-                                </StackPanel>
-                            </Border>
-                            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85">
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
-                                    <TextBlock Text="LAST VALUES SHOWN" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
+                    <views:EntitiesUi/>
                 </TabItem>
 
 
                 <!-- DISPLAY UI -->
                 <TabItem>
                     <Grid Background="White">
-                        <TextBlock Text="DISPLAY UI"
-                                   FontFamily="Courier New"
-                                   FontSize="44"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"/>
                     </Grid>
                 </TabItem>
 

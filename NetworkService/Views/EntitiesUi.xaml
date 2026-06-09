@@ -1,0 +1,619 @@
+﻿<UserControl x:Class="NetworkService.Views.EntitiesUi"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NetworkService.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0"
+Margin="25,25,25,0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT TITLE TEXT -->
+            <StackPanel Grid.Column="0"
+          VerticalAlignment="Center">
+
+                <TextBlock Text="Network Entities View"
+             FontFamily="Courier New"
+             FontSize="26"
+             FontWeight="DemiBold"
+             Foreground="Black"/>
+
+                <TextBlock Text="Table, inline validation, P1 search, P2 filter, add/delete DER entities"
+             FontFamily="Courier New"
+             FontSize="13"
+             FontWeight="Normal"
+             Foreground="#555555"
+             TextWrapping="Wrap"/>
+            </StackPanel>
+
+
+            <!-- RIGHT BUTTONS -->
+            <StackPanel Grid.Column="1"
+          Orientation="Horizontal"
+          HorizontalAlignment="Right"
+          VerticalAlignment="Center">
+
+                <!-- CLEAR FILTERS -->
+                <Button Width="160"
+          Height="45"
+          Margin="0,0,10,0"
+          Background="#F4F4F4"
+          BorderBrush="#222"
+          BorderThickness="1.5"
+          Foreground="Black"
+          Cursor="Hand">
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="7">
+                                <ContentPresenter HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+
+                    <Grid Margin="10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                     Text="Clear filters"
+                     FontFamily="Arial"
+                     FontSize="16"
+                     Foreground="Black"
+                     VerticalAlignment="Center"/>
+
+                        <Border Grid.Column="1"
+                  BorderBrush="#333"
+                  BorderThickness="1.5"
+                  CornerRadius="4"
+                  Padding="5,2"
+                  VerticalAlignment="Center">
+
+                            <TextBlock Text="Alt+C"
+                         FontFamily="Courier New"
+                         FontSize="11"
+                         FontWeight="Bold"
+                         Foreground="#333"/>
+                        </Border>
+                    </Grid>
+                </Button>
+
+
+                <!-- ADD ENTITY -->
+                <Button Width="145"
+          Height="45"
+          Background="#111"
+          BorderBrush="#111"
+          BorderThickness="1.5"
+          Foreground="White"
+          Cursor="Hand">
+
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="7">
+                                <ContentPresenter HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+
+                    <Grid Margin="10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                     Text="Add entity"
+                     FontFamily="Arial"
+                     FontSize="16"
+                     FontWeight="Bold"
+                     Foreground="White"
+                     VerticalAlignment="Center"/>
+
+                        <Border Grid.Column="1"
+                  BorderBrush="White"
+                  BorderThickness="1.5"
+                  CornerRadius="4"
+                  Padding="5,2"
+                  VerticalAlignment="Center">
+
+                            <TextBlock Text="Alt+A"
+                         FontFamily="Courier New"
+                         FontSize="11"
+                         FontWeight="Bold"
+                         Foreground="White"/>
+                        </Border>
+                    </Grid>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5 5 5 0">
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="8" Width="170" Height="85" Margin="5">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                    <TextBlock Text="Total Entities" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85" Margin="5">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                    <TextBlock Text="TVALID 1-5 MW" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85" Margin="5">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                    <TextBlock Text="INVALID ALERTS" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="Black" BorderThickness="1" Background="White" CornerRadius="8" Padding="16" Width="170" Height="85" Margin="5">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="4" FontFamily="Courier New" FontSize="26" FontWeight="DemiBold" Foreground="Black"/>
+                    <TextBlock Text="LAST VALUES SHOWN" FontFamily="Courier New" FontSize="13" FontWeight="Normal" Foreground="#555555"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+            <Grid Grid.Row="2" Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT PANEL -->
+                <Border Grid.Column="0"
+            BorderBrush="Black"
+            BorderThickness="1"
+            Background="White"
+            CornerRadius="8"
+            Margin="5"
+            ClipToBounds="True">
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- HEADER -->
+                        <Border Grid.Row="0"
+                    Background="#EFEFEF"
+                    BorderBrush="Black"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,8"
+                    CornerRadius="8,8,0,0">
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                               Text="Entity registry"
+                               VerticalAlignment="Center"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="#333"/>
+
+                                <Border Grid.Column="2"
+                            BorderBrush="#333"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="5,2"
+                            VerticalAlignment="Center">
+
+                                    <TextBlock Text="Tab order: Search → Filter → Table → Actions"
+                                   FontFamily="Courier New"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="#333"
+                                   TextTrimming="CharacterEllipsis"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- CONTENT -->
+                        <Border Grid.Row="1"
+                    BorderBrush="#333"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10"
+                    Margin="10">
+
+                            <StackPanel>
+                                <TextBlock Text="P1 Search by"
+                               VerticalAlignment="Center"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="#333"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <RadioButton Content="naziv"
+                                     Margin="10,0"
+                                     FontFamily="Courier New"
+                                     FontSize="11"
+                                     FontWeight="Black"
+                                     Foreground="#333"/>
+
+                                    <RadioButton Content="tip"
+                                     FontFamily="Courier New"
+                                     FontSize="11"
+                                     FontWeight="Black"
+                                     Foreground="#333"/>
+                                </StackPanel>
+
+                            <TextBox Margin="0,10,0,0"
+                             Height="30"
+                             FontFamily="Courier New"
+                             FontSize="11"
+                             Foreground="#333">
+                                <TextBox.Resources>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="CornerRadius" Value="4"/>
+                                    </Style>
+                                </TextBox.Resources>
+                            </TextBox>
+
+                            <TextBlock Margin="0,10,0,0"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               Foreground="#333"
+                               TextWrapping="Wrap"
+                               Text="Partial or full match. Use clear filters to restore all entities."/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- RIGHT PANEL -->
+            <!-- RIGHT PANEL -->
+            <Border Grid.Column="1"
+        BorderBrush="Black"
+        BorderThickness="1"
+        Background="White"
+        CornerRadius="8"
+        Margin="5"
+        ClipToBounds="True"
+        MinWidth="250">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- HEADER -->
+                    <Border Grid.Row="0"
+                Background="#EFEFEF"
+                BorderBrush="Black"
+                BorderThickness="0,0,0,1"
+                CornerRadius="8,8,0,0"
+                Padding="10,0">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                           Text="Add new DER entity"
+                           FontFamily="Courier New"
+                           FontSize="12"
+                           FontWeight="Bold"
+                           Foreground="#222"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+
+                            <Border Grid.Column="1"
+                        BorderBrush="#333"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="5,2"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center">
+
+                                <TextBlock Text="Inline validation"
+                               FontFamily="Courier New"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#333"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+
+                    <!-- FORM BODY -->
+                    <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+
+                        <Grid Margin="10">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="36"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="36"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="36"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+
+                            <!-- ID LABEL -->
+                            <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            Margin="0,0,0,4">
+
+                                <TextBlock Text="ID"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               FontWeight="Bold"
+                               Foreground="#333"
+                               VerticalAlignment="Center"/>
+
+                                <Border BorderBrush="#333"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="5,1"
+                            Margin="6,0,0,0"
+                            VerticalAlignment="Center">
+
+                                    <TextBlock Text="int"
+                                   FontFamily="Courier New"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="#333"/>
+                                </Border>
+                            </StackPanel>
+
+
+                            <!-- TYPE LABEL -->
+                            <TextBlock Grid.Row="0"
+                           Grid.Column="2"
+                           Text="Type"
+                           FontFamily="Courier New"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#333"
+                           Margin="0,0,0,4"
+                           VerticalAlignment="Center"/>
+
+
+                            <!-- ID INPUT -->
+                            <Border Grid.Row="1"
+                        Grid.Column="0"
+                        BorderBrush="#333"
+                        BorderThickness="1.2"
+                        CornerRadius="5"
+                        Background="White">
+
+                                <TextBox Text="e.g. 105"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="#888"
+                             FontFamily="Arial"
+                             FontSize="14"
+                             Padding="8,0"
+                             VerticalContentAlignment="Center"/>
+                            </Border>
+
+
+                            <!-- TYPE INPUT -->
+                            <Border Grid.Row="1"
+                        Grid.Column="2"
+                        BorderBrush="#333"
+                        BorderThickness="1.2"
+                        CornerRadius="5"
+                        Background="White">
+
+                                <TextBox Text="Choose type"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="#222"
+                             FontFamily="Arial"
+                             FontSize="14"
+                             Padding="8,0"
+                             VerticalContentAlignment="Center"/>
+                            </Border>
+
+
+                            <!-- NAME LABEL -->
+                            <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Text="Naziv"
+                           FontFamily="Courier New"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#333"
+                           Margin="0,8,0,4"/>
+
+
+                            <!-- NAME INPUT -->
+                            <Border Grid.Row="3"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        BorderBrush="#333"
+                        BorderThickness="1.2"
+                        CornerRadius="5"
+                        Background="White">
+
+                                <TextBox Text="e.g. PV South Array"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="#888"
+                             FontFamily="Arial"
+                             FontSize="14"
+                             Padding="8,0"
+                             VerticalContentAlignment="Center"/>
+                            </Border>
+
+
+                            <!-- VALUE LABEL -->
+                            <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Text="Initial measured value (MW)"
+                           FontFamily="Courier New"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           Foreground="#333"
+                           Margin="0,8,0,4"
+                           TextTrimming="CharacterEllipsis"/>
+
+
+                            <!-- VALUE INPUT -->
+                            <Border Grid.Row="5"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        BorderBrush="#333"
+                        BorderThickness="1.2"
+                        CornerRadius="5"
+                        Background="White">
+
+                                <TextBox Text="1.0 – 5.0"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="#888"
+                             FontFamily="Arial"
+                             FontSize="14"
+                             Padding="8,0"
+                             VerticalContentAlignment="Center"/>
+                            </Border>
+
+
+                            <!-- BUTTONS -->
+                            <StackPanel Grid.Row="6"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,10,0,0">
+
+                                <Button Width="62"
+                            Height="34"
+                            Margin="0,0,8,0"
+                            Background="White"
+                            BorderBrush="#222"
+                            BorderThickness="1.2"
+                            Foreground="Black"
+                            Cursor="Hand">
+
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="5">
+
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+
+                                    <TextBlock Text="Clear"
+                                   FontFamily="Arial"
+                                   FontSize="14"
+                                   Foreground="Black"/>
+                                </Button>
+
+
+                                <Button Width="82"
+                            Height="34"
+                            Background="#111"
+                            BorderBrush="#111"
+                            BorderThickness="1.2"
+                            Foreground="White"
+                            Cursor="Hand">
+
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="5">
+
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+
+                                    <TextBlock Text="Add DER"
+                                   FontFamily="Arial"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                                </Button>
+
+                            </StackPanel>
+
+
+                            <!-- DESIGN NOTE -->
+                            <Border Grid.Row="7"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        BorderBrush="#333"
+                        BorderThickness="1.2"
+                        CornerRadius="6"
+                        Padding="8"
+                        Margin="0,10,0,0">
+
+                                <TextBlock TextWrapping="Wrap"
+                               FontFamily="Arial"
+                               FontSize="11"
+                               Foreground="#222">
+
+                        <Run Text="Design note: "
+                             FontWeight="Bold"/>
+
+                        <Run Text="No MessageBox. Every field has its own error area. Success/failure feedback is a toast with type, title, content and buttons."/>
+
+                                </TextBlock>
+                            </Border>
+
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

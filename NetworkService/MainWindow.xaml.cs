@@ -9,6 +9,7 @@ namespace NetworkService
         public MainWindow()
         {
             InitializeComponent();
+
         }
 
         private void EntitiesNav_Checked(object sender, RoutedEventArgs e)
@@ -64,5 +65,10 @@ namespace NetworkService
         {
 
         }
+
+        public class Kurac { 
+            public string Name { get; set; } = "Kurac";
+        }
+
     }
 }
