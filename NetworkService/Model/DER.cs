@@ -1,29 +1,156 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NetworkService.Model.Validation;
 
 namespace NetworkService.Model
 {
-    public enum DERType
+    public class DER : ValidationBase
     {
-        SolarPanel,
-        WindTurbine
-    }
-    public class DER
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public DERType type { get; set; }
-        public double vrednost { get; set; }
+        public const double MinValidMeasurement = 1.0;
+        public const double MaxValidMeasurement = 5.0;
 
-        public DER(int id, string name, DERType type, double vrednost)
+        private int id;
+        private string name;
+        private DEREntityType entityType;
+        private double lastMeasurement;
+        private IEnumerable<DER> existingEntities;
+
+        public DER()
         {
-            this.id = id;
-            this.name = name;
-            this.type = type;
-            this.vrednost = vrednost;
-        }   
+        }
+
+        public DER(int id, string name, DEREntityType entityType, double lastMeasurement)
+        {
+            Id = id;
+            Name = name;
+            EntityType = entityType;
+            LastMeasurement = lastMeasurement;
+        }
+
+        public int Id
+        {
+            get
+            {
+                return id;
+            }
+            set
+            {
+                SetProperty(ref id, value);
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                SetProperty(ref name, value);
+            }
+        }
+
+        public DEREntityType EntityType
+        {
+            get
+            {
+                return entityType;
+            }
+            set
+            {
+                SetProperty(ref entityType, value);
+                OnPropertyChanged("TypeName");
+                OnPropertyChanged("ImagePath");
+            }
+        }
+
+        public double LastMeasurement
+        {
+            get
+            {
+                return lastMeasurement;
+            }
+            set
+            {
+                SetProperty(ref lastMeasurement, value);
+                OnPropertyChanged("IsMeasurementValid");
+                OnPropertyChanged("StatusText");
+                OnPropertyChanged("FormattedMeasurement");
+            }
+        }
+
+        public string TypeName
+        {
+            get
+            {
+                return EntityType == null ? string.Empty : EntityType.TypeName;
+            }
+        }
+
+        public string ImagePath
+        {
+            get
+            {
+                return EntityType == null ? string.Empty : EntityType.ImagePath;
+            }
+        }
+
+        public bool IsMeasurementValid
+        {
+            get
+            {
+                return LastMeasurement >= MinValidMeasurement && LastMeasurement <= MaxValidMeasurement;
+            }
+        }
+
+        public string StatusText
+        {
+            get
+            {
+                return IsMeasurementValid ? "VALID" : "INVALID";
+            }
+        }
+
+        public string FormattedMeasurement
+        {
+            get
+            {
+                return LastMeasurement.ToString("0.0") + " MW";
+            }
+        }
+
+        public void SetExistingEntities(IEnumerable<DER> entities)
+        {
+            existingEntities = entities;
+        }
+
+        protected override void ValidateSelf()
+        {
+            if (Id <= 0)
+            {
+                ValidationErrors["Id"] = "ID must be a positive integer.";
+            }
+
+            if (existingEntities != null && existingEntities.Any(entity => entity != this && entity.Id == Id))
+            {
+                ValidationErrors["Id"] = "ID must be unique.";
+            }
+
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                ValidationErrors["Name"] = "Name is required.";
+            }
+
+            if (EntityType == null)
+            {
+                ValidationErrors["EntityType"] = "Entity type is required.";
+            }
+        }
+
+        public DER Clone()
+        {
+            return new DER(Id, Name, EntityType, LastMeasurement);
+        }
     }
 }

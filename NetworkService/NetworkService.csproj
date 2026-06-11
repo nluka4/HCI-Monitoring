@@ -57,6 +57,16 @@
     </ApplicationDefinition>
     <Compile Include="Model\DER.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\BindableBase.cs" />
+<Compile Include="ViewModel\MyICommand.cs" />
+<Compile Include="Model\DEREntityType.cs" />
+<Compile Include="Model\MeasurementPoint.cs" />
+<Compile Include="Model\Connection.cs" />
+<Compile Include="Model\SavedSearch.cs" />
+<Compile Include="Model\Validation\ValidationErrors.cs" />
+<Compile Include="Model\Validation\ValidationBase.cs" />
+<Compile Include="ViewModel\PlaceholderViewModel.cs" />
+<Compile Include="ViewModel\EntitiesViewModel.cs" />
     <Compile Include="Views\EntitiesUi.xaml.cs">
       <DependentUpon>EntitiesUi.xaml</DependentUpon>
     </Compile>
