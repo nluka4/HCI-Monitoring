@@ -44,6 +44,9 @@ namespace NetworkService.ViewModel
 
             EntitiesViewModel = new EntitiesViewModel(this, AllEntities, AvailableTypes);
 
+            NetworkDisplayViewModel = new NetworkDisplayViewModel(this, AllEntities, AvailableTypes);
+
+
             DisplayPlaceholderViewModel = new PlaceholderViewModel(
                 "Network Display View",
                 "Drag & Drop canvas will be implemented in the next step.");
@@ -68,7 +71,7 @@ namespace NetworkService.ViewModel
 
             CreateListener();
         }
-
+        public NetworkDisplayViewModel NetworkDisplayViewModel { get; private set; }
         public ObservableCollection<DER> AllEntities { get; private set; }
 
         public ObservableCollection<DEREntityType> AvailableTypes { get; private set; }
@@ -92,6 +95,7 @@ namespace NetworkService.ViewModel
         public MyICommand ExecuteTerminalCommand { get; private set; }
 
         public MyICommand DismissToastCommand { get; private set; }
+
 
         public BindableBase CurrentViewModel
         {
@@ -170,6 +174,7 @@ namespace NetworkService.ViewModel
             AllEntities.Add(new DER(1, "SP-Alpha", solarPanelType, 2.4));
             AllEntities.Add(new DER(2, "WT-Bravo", windTurbineType, 3.7));
             AllEntities.Add(new DER(3, "SP-Charlie", solarPanelType, 1.8));
+            AllEntities.Add(new DER(4, "WT-Delta", windTurbineType, 5.8));
         }
 
         private void Navigate(string destination)
@@ -188,7 +193,7 @@ namespace NetworkService.ViewModel
                     break;
 
                 case "display":
-                    CurrentViewModel = DisplayPlaceholderViewModel;
+                    CurrentViewModel = NetworkDisplayViewModel;
                     break;
 
                 case "graph":
@@ -231,7 +236,7 @@ namespace NetworkService.ViewModel
                     break;
 
                 case "display":
-                    CurrentViewModel = DisplayPlaceholderViewModel;
+                    CurrentViewModel = NetworkDisplayViewModel;
                     break;
 
                 case "graph":
@@ -273,6 +278,7 @@ namespace NetworkService.ViewModel
         public void RefreshAllViewModels()
         {
             EntitiesViewModel.RefreshDisplayedEntities();
+            NetworkDisplayViewModel.RefreshState();
         }
 
         public void ShowToast(string title, string message, string type)

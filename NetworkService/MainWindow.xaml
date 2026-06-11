@@ -1,353 +1,545 @@
 ﻿<Window x:Class="NetworkService.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NetworkService"
+        xmlns:viewModel="clr-namespace:NetworkService.ViewModel"
         xmlns:views="clr-namespace:NetworkService.Views"
-        mc:Ignorable="d"
-        Title="MainWindow"
-        MinHeight="600"
-        MinWidth="1200"
-        Background="#E8E8E8">
+        Title="NetworkService"
+        Height="850"
+        Width="1400"
+        MinHeight="720"
+        MinWidth="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource UIBackgroundBrush}">
 
-    <Window.Resources>
+	<Window.Resources>
+		<DataTemplate DataType="{x:Type viewModel:EntitiesViewModel}">
+			<views:EntitiesUi/>
+		</DataTemplate>
 
-        <!-- HEADER TEXT -->
-        <Style TargetType="{x:Type TextBlock}" x:Key="HeaderText">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontFamily" Value="Courier New"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Margin" Value="5,20"/>
-            <Setter Property="FontWeight" Value="DemiBold"/>
-        </Style>
+		<DataTemplate DataType="{x:Type viewModel:NetworkDisplayViewModel}">
+			<views:NetworkDisplayView/>
+		</DataTemplate>
 
-        <!-- GROUP LABEL -->
-        <Style TargetType="{x:Type TextBlock}" x:Key="TabGroupDescription">
-            <Setter Property="FontFamily" Value="Courier New"/>
-            <Setter Property="FontWeight" Value="DemiBold"/>
-            <Setter Property="Foreground" Value="#444"/>
-            <Setter Property="FontSize" Value="18"/>
-        </Style>
+		<DataTemplate DataType="{x:Type viewModel:PlaceholderViewModel}">
+			<Grid Background="{StaticResource UIBackgroundBrush}" Margin="18">
+				<Border Style="{StaticResource PanelBorderStyle}"
+                        Padding="28"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Width="620">
+					<StackPanel>
+						<TextBlock Text="{Binding Title}"
+                                   FontFamily="Courier New"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,10"/>
 
-        <!-- TABCONTROL BEZ GORNJIH TABOVA -->
-        <Style TargetType="{x:Type TabControl}" x:Key="ContentOnlyTabControl">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TabControl}">
-                        <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+						<TextBlock Text="{Binding Description}"
+                                   FontSize="15"
+                                   Foreground="{StaticResource UIMutedTextBrush}"
+                                   TextWrapping="Wrap"
+                                   LineHeight="23"/>
 
-                            <ContentPresenter x:Name="PART_SelectedContentHost"
-                                      Content="{TemplateBinding SelectedContent}"
-                                      ContentTemplate="{TemplateBinding SelectedContentTemplate}"
-                                      ContentTemplateSelector="{TemplateBinding SelectedContentTemplateSelector}"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch"
-                                      Margin="0"/>
+						<Border BorderBrush="{StaticResource UISubtleBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Background="{StaticResource UIBackgroundBrush}"
+                                Padding="12"
+                                Margin="0,18,0,0">
+							<TextBlock Text="This is only a temporary placeholder. The real Display and Graph views are added in the next steps."
+                                       TextWrapping="Wrap"
+                                       Foreground="{StaticResource UIMutedTextBrush}"/>
+						</Border>
+					</StackPanel>
+				</Border>
+			</Grid>
+		</DataTemplate>
+	</Window.Resources>
 
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+	<Window.InputBindings>
+		<KeyBinding Key="D1"
+                    Modifiers="Alt"
+                    Command="{Binding NavCommand}"
+                    CommandParameter="entities"/>
 
-        <!-- NAV RADIO BUTTON: ENTITIES / DISPLAY / GRAPH -->
-        <Style TargetType="{x:Type RadioButton}" x:Key="SideNavRadioButton">
-            <Setter Property="FontFamily" Value="Courier New"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#222"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="10,4"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type RadioButton}">
-                        <Border x:Name="MainBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="7">
+		<KeyBinding Key="D2"
+                    Modifiers="Alt"
+                    Command="{Binding NavCommand}"
+                    CommandParameter="display"/>
 
-                            <Grid Margin="16,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+		<KeyBinding Key="D3"
+                    Modifiers="Alt"
+                    Command="{Binding NavCommand}"
+                    CommandParameter="graph"/>
 
-                                <TextBlock Grid.Column="0"
-                                           Text="{TemplateBinding Content}"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           FontFamily="{TemplateBinding FontFamily}"
-                                           FontSize="{TemplateBinding FontSize}"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           VerticalAlignment="Center"/>
+		<KeyBinding Key="Escape"
+                    Command="{Binding BackCommand}"/>
 
-                                <Border x:Name="ShortcutBorder"
-                                        Grid.Column="1"
-                                        BorderBrush="{TemplateBinding Foreground}"
-                                        BorderThickness="1.5"
-                                        CornerRadius="5"
-                                        Padding="8,4"
-                                        VerticalAlignment="Center">
+		<KeyBinding Key="Z"
+                    Modifiers="Control"
+                    Command="{Binding UndoCommand}"/>
 
-                                    <TextBlock Text="{TemplateBinding Tag}"
-                                               Foreground="{TemplateBinding Foreground}"
-                                               FontFamily="Courier New"
-                                               FontSize="18"
-                                               FontWeight="DemiBold"/>
-                                </Border>
-                            </Grid>
-                        </Border>
+		<KeyBinding Key="F1"
+                    Command="{Binding ToggleShortcutOverlayCommand}"/>
 
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="MainBorder" Property="Background" Value="#111"/>
-                                <Setter TargetName="MainBorder" Property="BorderBrush" Value="#111"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
+		<KeyBinding Key="Oem3"
+                    Modifiers="Control"
+                    Command="{Binding ToggleTerminalCommand}"/>
+		<KeyBinding Key="F7"
+            Command="{Binding NetworkDisplayViewModel.ToggleConnectionModeCommand}"/>
+	</Window.InputBindings>
 
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="MainBorder" Property="BorderThickness" Value="3"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- COMMAND BUTTON: BACK / UNDO / SHORTCUTS / TERMINAL -->
-        <Style TargetType="{x:Type Button}" x:Key="SideCommandButton">
-            <Setter Property="FontFamily" Value="Courier New"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#222"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="10,4"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="MainBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="7">
-
-                            <Grid Margin="16,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Column="0"
-                                           Text="{TemplateBinding Content}"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           FontFamily="{TemplateBinding FontFamily}"
-                                           FontSize="{TemplateBinding FontSize}"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           VerticalAlignment="Center"/>
-
-                                <Border Grid.Column="1"
-                                        BorderBrush="#333"
-                                        BorderThickness="1.5"
-                                        CornerRadius="5"
-                                        Padding="8,4"
-                                        VerticalAlignment="Center">
-
-                                    <TextBlock Text="{TemplateBinding Tag}"
-                                               Foreground="#333"
-                                               FontFamily="Courier New"
-                                               FontSize="18"
-                                               FontWeight="DemiBold"/>
-                                </Border>
-                            </Grid>
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="MainBorder" Property="Background" Value="#E7E7E7"/>
-                                <Setter TargetName="MainBorder" Property="BorderThickness" Value="3"/>
-                            </Trigger>
-
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="MainBorder" Property="Background" Value="#D0D0D0"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </Window.Resources>
-
-
-    <Grid>
+	<Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="70"/>
+            <RowDefinition Height="52"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="145" MinHeight="34" MaxHeight="320"/>
         </Grid.RowDefinitions>
 
-
-        <!-- HEADER -->
-        <StackPanel Grid.Row="0"
-                    Background="#111"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Stretch">
-
-            <Border BorderThickness="2"
-                    BorderBrush="White"
-                    Margin="16"
-                    Padding="4"
-                    CornerRadius="5"
-                    VerticalAlignment="Center">
-
-                <TextBlock Style="{StaticResource HeaderText}"
-                           Margin="0"
-                           FontSize="24"
-                           FontWeight="Black">
-                    NS
-                </TextBlock>
-            </Border>
-
-            <TextBlock Style="{StaticResource HeaderText}"
-                       FontSize="24"
-                       FontWeight="Black"
-                       VerticalAlignment="Center">
-                NetworkService
-            </TextBlock>
-
-            <TextBlock Style="{StaticResource HeaderText}"
-                       FontSize="22"
-                       VerticalAlignment="Center">
-                · DER Monitoring
-            </TextBlock>
-
-            <TextBlock Style="{StaticResource HeaderText}"
-                       FontSize="22"
-                       VerticalAlignment="Center">
-                · CG2/T4/G2/P1
-            </TextBlock>
-
-        </StackPanel>
-
-
-        <!-- BODY -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-
-            <!-- LEFT SIDEBAR -->
-            <Border Grid.Column="0"
-                    Background="#E4E4E4"
-                    BorderBrush="#111"
-                    BorderThickness="0,0,2,0">
-
-                <StackPanel Margin="0,22,0,0">
-
-                    <TextBlock Style="{StaticResource TabGroupDescription}"
-                               Margin="22,0,0,8">
-                        VIEWS / KEYBOARD-FIRST
-                    </TextBlock>
-
-                    <RadioButton x:Name="EntitiesNav"
-                                 Style="{StaticResource SideNavRadioButton}"
-                                 GroupName="MainViews"
-                                 Content="Entities"
-                                 Tag="Alt+1"
-                                 IsChecked="True"
-                                 Checked="EntitiesNav_Checked"/>
-
-                    <RadioButton x:Name="DisplayNav"
-                                 Style="{StaticResource SideNavRadioButton}"
-                                 GroupName="MainViews"
-                                 Content="Display"
-                                 Tag="Alt+2"
-                                 Checked="DisplayNav_Checked"/>
-
-                    <RadioButton x:Name="GraphNav"
-                                 Style="{StaticResource SideNavRadioButton}"
-                                 GroupName="MainViews"
-                                 Content="Graph"
-                                 Tag="Alt+3"
-                                 Checked="GraphNav_Checked"/>
-
-
-                    <TextBlock Style="{StaticResource TabGroupDescription}"
-                               Margin="22,18,0,8">
-                        GLOBAL ACTIONS
-                    </TextBlock>
-
-                    <Button Style="{StaticResource SideCommandButton}"
-                            Content="Back"
-                            Tag="Esc"
-                            Click="BackButton_Click"/>
-
-                    <Button Style="{StaticResource SideCommandButton}"
-                            Content="Undo"
-                            Tag="Ctrl+Z"
-                            Click="UndoButton_Click"/>
-
-                    <Button Style="{StaticResource SideCommandButton}"
-                            Content="Shortcuts"
-                            Tag="F1"
-                            Click="ShortcutsButton_Click"/>
-
-                    <Button Style="{StaticResource SideCommandButton}"
-                            Content="Terminal"
-                            Tag="Ctrl+`"
-                            Click="TerminalButton_Click"/>
-
-                </StackPanel>
-            </Border>
-
-
-            <!-- RIGHT CONTENT -->
-            <TabControl x:Name="MainTabs"
-                        Grid.Column="1"
-                        Style="{StaticResource ContentOnlyTabControl}"
-                        Background="#F4F4F4"
-                        BorderThickness="0"
-                        SelectedIndex="0" SelectionChanged="MainTabs_SelectionChanged">
-
-                <!-- ENTITIES UI -->
-                <TabItem>
-                    <views:EntitiesUi/>
-                </TabItem>
-
-
-                <!-- DISPLAY UI -->
-                <TabItem>
-                    <Grid Background="White">
-                    </Grid>
-                </TabItem>
-
-
-                <!-- GRAPH UI -->
-                <TabItem>
-                    <Grid Background="White">
-                        <TextBlock Text="GRAPH UI"
+        <!-- ================= TOP BAR ================= -->
+		<Border Grid.Row="0"
+                Background="{StaticResource UIPrimaryBrush}"
+                BorderBrush="{StaticResource UIBorderBrush}"
+                BorderThickness="0,0,0,2">
+			<DockPanel LastChildFill="False" Margin="18,0">
+				<StackPanel DockPanel.Dock="Left"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+					<Border Width="30"
+                            Height="30"
+                            BorderBrush="{StaticResource UIWhiteBrush}"
+                            BorderThickness="2"
+                            CornerRadius="4"
+                            Margin="0,0,12,0">
+						<TextBlock Text="NS"
+                                   Foreground="{StaticResource UIWhiteBrush}"
                                    FontFamily="Courier New"
-                                   FontSize="44"
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
-                    </Grid>
-                </TabItem>
+					</Border>
 
-            </TabControl>
+					<TextBlock Text="NetworkService · DER Monitoring · CG2/T4/G2/P1"
+                               Foreground="{StaticResource UIWhiteBrush}"
+                               FontFamily="Courier New"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+				</StackPanel>
 
-        </Grid>
-    </Grid>
+				<StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+					<Border BorderBrush="{StaticResource UIWhiteBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="8,4"
+                            Margin="0,0,8,0">
+						<TextBlock Text="log.txt WRITING"
+                                   Foreground="{StaticResource UIWhiteBrush}"
+                                   FontFamily="Courier New"
+                                   FontSize="11"/>
+					</Border>
+
+					<Border BorderBrush="{StaticResource UIWhiteBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="8,4"
+                            Margin="0,0,8,0">
+						<TextBlock Text="TCP :25675"
+                                   Foreground="{StaticResource UIWhiteBrush}"
+                                   FontFamily="Courier New"
+                                   FontSize="11"/>
+					</Border>
+
+					<Border BorderBrush="{StaticResource UIWhiteBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="8,4">
+						<TextBlock Text="Palette: grayscale"
+                                   Foreground="{StaticResource UIWhiteBrush}"
+                                   FontFamily="Courier New"
+                                   FontSize="11"/>
+					</Border>
+				</StackPanel>
+			</DockPanel>
+		</Border>
+
+		<!-- ================= MAIN AREA ================= -->
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="245"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+
+			<!-- ================= SIDEBAR ================= -->
+			<Border Grid.Column="0"
+                    Background="#E7E7E7"
+                    BorderBrush="{StaticResource UIBorderBrush}"
+                    BorderThickness="0,0,2,0"
+                    Padding="10">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="Auto"/>
+					</Grid.RowDefinitions>
+
+					<StackPanel Grid.Row="0">
+						<TextBlock Text="VIEWS / KEYBOARD-FIRST"
+                                   Style="{StaticResource MonoLabelText}"
+                                   Margin="0,0,0,8"/>
+
+						<Button Command="{Binding NavCommand}"
+                                CommandParameter="entities"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Open Network Entities View"
+                                Margin="0,0,0,8">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Entities"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Alt+1" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+
+						<Button Command="{Binding NavCommand}"
+                                CommandParameter="display"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Open Network Display View"
+                                Margin="0,0,0,8">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Display"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Alt+2" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+
+						<Button Command="{Binding NavCommand}"
+                                CommandParameter="graph"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Open Measurement Graph View">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Graph"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Alt+3" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+					</StackPanel>
+
+					<StackPanel Grid.Row="1" Margin="0,22,0,0">
+						<TextBlock Text="GLOBAL ACTIONS"
+                                   Style="{StaticResource MonoLabelText}"
+                                   Margin="0,0,0,8"/>
+
+						<Button Command="{Binding BackCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Return to previous View"
+                                Margin="0,0,0,8">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Back"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Esc" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+
+						<Button Command="{Binding UndoCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Undo last command"
+                                Margin="0,0,0,8">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Undo"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Ctrl+Z" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+
+						<Button Command="{Binding ToggleShortcutOverlayCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Show keyboard shortcuts"
+                                Margin="0,0,0,8">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Shortcuts"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="F1" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+
+						<Button Command="{Binding ToggleTerminalCommand}"
+                                Style="{StaticResource BaseButtonStyle}"
+                                ToolTip="Collapse or expand mini-terminal">
+							<DockPanel LastChildFill="False">
+								<TextBlock Text="Terminal"/>
+								<Border DockPanel.Dock="Right"
+                                        BorderBrush="{StaticResource UIPrimaryBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4,1"
+                                        Margin="30,0,0,0">
+									<TextBlock Text="Ctrl+`" FontSize="10"/>
+								</Border>
+							</DockPanel>
+						</Button>
+					</StackPanel>
+
+					<Border Grid.Row="3"
+                            BorderBrush="{StaticResource UISubtleBorderBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="0,12,0,0">
+						<TextBlock Text="SCADA-style shell&#x0a;Keyboard-first interface for Linux power users. Use shortcuts or mini-terminal commands."
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource UIMutedTextBrush}"
+                                   FontSize="12"
+                                   LineHeight="18"/>
+					</Border>
+				</Grid>
+			</Border>
+
+			<!-- ================= ACTIVE VIEW ================= -->
+			<ContentControl Grid.Column="1"
+                            Content="{Binding CurrentViewModel}"/>
+		</Grid>
+
+        <!-- ================= TERMINAL RESIZER ================= -->
+        <GridSplitter Grid.Row="2"
+              Height="6"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Background="{StaticResource UIPrimaryBrush}"
+              ResizeDirection="Rows"
+              ResizeBehavior="PreviousAndNext"
+              ShowsPreview="False"
+              Cursor="SizeNS"
+              ToolTip="Drag up or down to resize the terminal"/>
+
+        <!-- ================= MINI TERMINAL ================= -->
+		<Border Grid.Row="3"
+                Background="{StaticResource UIPrimaryBrush}"
+                BorderBrush="{StaticResource UIBorderBrush}"
+                BorderThickness="0,2,0,0">
+			
+
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="32"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+
+				<DockPanel Grid.Row="0"
+                           LastChildFill="False"
+                           Margin="12,0">
+					<TextBlock DockPanel.Dock="Left"
+                               Text="TERMINAL · operator@networkservice:~$"
+                               Foreground="{StaticResource UIWhiteBrush}"
+                               FontFamily="Courier New"
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+
+					<TextBlock DockPanel.Dock="Right"
+                               Text="try: help, list, nav graph, search solar, undo"
+                               Foreground="{StaticResource UIWhiteBrush}"
+                               FontFamily="Courier New"
+                               FontSize="11"
+                               Opacity="0.85"
+                               VerticalAlignment="Center"/>
+				</DockPanel>
+
+				<Grid Grid.Row="1" Margin="12,4,12,8">
+					<Grid.Style>
+						<Style TargetType="{x:Type Grid}">
+							<Setter Property="Visibility" Value="Visible"/>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsTerminalExpanded}" Value="False">
+									<Setter Property="Visibility" Value="Collapsed"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Grid.Style>
+
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="360"/>
+					</Grid.ColumnDefinitions>
+
+					<Border Grid.Column="0"
+                            BorderBrush="{StaticResource UIWhiteBrush}"
+                            BorderThickness="1"
+                            CornerRadius="5"
+                            Padding="8"
+                            Margin="0,0,10,0">
+						<ScrollViewer VerticalScrollBarVisibility="Auto">
+							<TextBlock Text="{Binding TerminalOutput}"
+                                       Foreground="{StaticResource UIWhiteBrush}"
+                                       FontFamily="Courier New"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"/>
+						</ScrollViewer>
+					</Border>
+
+					<TextBox Grid.Column="1"
+                             Text="{Binding TerminalInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Background="{StaticResource UIPrimaryBrush}"
+                             Foreground="{StaticResource UIWhiteBrush}"
+                             BorderBrush="{StaticResource UIWhiteBrush}"
+                             CaretBrush="{StaticResource UIWhiteBrush}"
+                             FontFamily="Courier New"
+                             ToolTip="Mini-terminal command input">
+						<TextBox.InputBindings>
+							<KeyBinding Key="Enter"
+                                        Command="{Binding ExecuteTerminalCommand}"/>
+						</TextBox.InputBindings>
+					</TextBox>
+				</Grid>
+			</Grid>
+		</Border>
+
+		<!-- ================= SHORTCUTS OVERLAY ================= -->
+        <Border Grid.Row="0"
+        Grid.RowSpan="4"
+        Panel.ZIndex="900"
+        Background="{StaticResource UIOverlayBrush}">
+            <Border.Style>
+				<Style TargetType="{x:Type Border}">
+					<Setter Property="Visibility" Value="Collapsed"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsShortcutOverlayVisible}" Value="True">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Border.Style>
+
+			<Border Width="460"
+                    Background="{StaticResource UIPanelBrush}"
+                    BorderBrush="{StaticResource UIBorderBrush}"
+                    BorderThickness="2"
+                    CornerRadius="12"
+                    Padding="18"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,76,24,0">
+				<StackPanel>
+					<TextBlock Text="Keyboard shortcuts"
+                               FontFamily="Courier New"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Margin="0,0,0,12"/>
+
+					<TextBlock Text="Alt+1  → Entities View" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Alt+2  → Display View" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Alt+3  → Graph View" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Esc    → Back / close overlay" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Ctrl+Z → Undo last command" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="F1     → Show / hide shortcuts" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Ctrl+` → Toggle mini-terminal" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Alt+Enter → Add entity" FontFamily="Courier New" Margin="0,3"/>
+					<TextBlock Text="Alt+C → Clear filters" FontFamily="Courier New" Margin="0,3"/>
+
+					<Button Content="Close"
+                            Command="{Binding ToggleShortcutOverlayCommand}"
+                            Style="{StaticResource BaseButtonStyle}"
+                            HorizontalAlignment="Right"
+                            Margin="0,16,0,0"/>
+				</StackPanel>
+			</Border>
+		</Border>
+
+		<!-- ================= TOAST ================= -->
+        <Border Grid.Row="0"
+        Grid.RowSpan="4"
+        Panel.ZIndex="1000"
+        Width="380"
+        Background="{StaticResource UIPanelBrush}"
+        BorderBrush="{StaticResource UIBorderBrush}"
+        BorderThickness="2"
+        CornerRadius="10"
+        Padding="14"
+        HorizontalAlignment="Right"
+        VerticalAlignment="Bottom"
+        Margin="0,0,24,24">
+            <Border.Style>
+				<Style TargetType="{x:Type Border}">
+					<Setter Property="Visibility" Value="Collapsed"/>
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding IsToastVisible}" Value="True">
+							<Setter Property="Visibility" Value="Visible"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Border.Style>
+
+			<StackPanel>
+				<DockPanel LastChildFill="False">
+					<TextBlock DockPanel.Dock="Left"
+                               Text="{Binding ToastTitle}"
+                               FontFamily="Courier New"
+                               FontWeight="Bold"
+                               FontSize="15"/>
+
+					<Border DockPanel.Dock="Right"
+                            BorderBrush="{StaticResource UIPrimaryBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="5,2">
+						<TextBlock Text="{Binding ToastType}"
+                                   FontFamily="Courier New"
+                                   FontSize="10"/>
+					</Border>
+				</DockPanel>
+
+				<TextBlock Text="{Binding ToastMessage}"
+                           TextWrapping="Wrap"
+                           Foreground="{StaticResource UIMutedTextBrush}"
+                           Margin="0,8,0,12"/>
+
+				<StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+					<Button Content="Dismiss"
+                            Command="{Binding DismissToastCommand}"
+                            Style="{StaticResource BaseButtonStyle}"
+                            Margin="0,0,8,0"/>
+
+					<Button Content="Undo"
+                            Command="{Binding UndoCommand}"
+                            Style="{StaticResource BaseButtonStyle}"/>
+				</StackPanel>
+			</StackPanel>
+		</Border>
+	</Grid>
 </Window>

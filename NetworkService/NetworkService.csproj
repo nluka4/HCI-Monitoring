@@ -67,6 +67,12 @@
 <Compile Include="Model\Validation\ValidationBase.cs" />
 <Compile Include="ViewModel\PlaceholderViewModel.cs" />
 <Compile Include="ViewModel\EntitiesViewModel.cs" />
+<Compile Include="Model\CanvasSlot.cs" />
+<Compile Include="Model\DERGroup.cs" />
+<Compile Include="ViewModel\NetworkDisplayViewModel.cs" />
+<Compile Include="Views\NetworkDisplayView.xaml.cs">
+  <DependentUpon>NetworkDisplayView.xaml</DependentUpon>
+</Compile>
     <Compile Include="Views\EntitiesUi.xaml.cs">
       <DependentUpon>EntitiesUi.xaml</DependentUpon>
     </Compile>
@@ -86,6 +92,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\NetworkDisplayView.xaml">
+  <SubType>Designer</SubType>
+  <Generator>MSBuild:Compile</Generator>
+</Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

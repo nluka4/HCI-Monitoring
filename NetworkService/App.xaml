@@ -20,6 +20,7 @@
         <SolidColorBrush x:Key="UIFocusBrush" Color="#000000"/>
         <SolidColorBrush x:Key="UIWhiteBrush" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="UIErrorBrush" Color="#7A1F1F"/>
+		<SolidColorBrush x:Key="UIOverlayBrush" Color="#66000000"/>
 
         <!-- ================= FOCUS STYLE ================= -->
         <Style x:Key="KeyboardFocusStyle">
@@ -38,9 +39,8 @@
         <!-- ================= TEXT ================= -->
         <Style TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Segoe UI"/>
-            <Setter Property="Foreground" Value="{StaticResource UIPrimaryBrush}"/>
         </Style>
-
+        
         <Style x:Key="MonoLabelText" TargetType="{x:Type TextBlock}">
             <Setter Property="FontFamily" Value="Courier New"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -73,8 +73,8 @@
             <Setter Property="Foreground" Value="{StaticResource UIPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource UIBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="MinHeight" Value="38"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="MinHeight" Value="34"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">

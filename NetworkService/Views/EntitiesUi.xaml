@@ -5,12 +5,19 @@
 
     <UserControl.InputBindings>
         <KeyBinding Key="Enter"
-                    Modifiers="Alt"
-                    Command="{Binding AddCommand}" />
+                Modifiers="Alt"
+                Command="{Binding AddCommand}" />
+
+        <KeyBinding Key="C"
+                Modifiers="Alt"
+                Command="{Binding ClearFiltersCommand}" />
+
+        <KeyBinding Key="Delete"
+                Command="{Binding DeleteCommand}" />
     </UserControl.InputBindings>
 
     <Grid>
-        <Grid Margin="18">
+        <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -18,15 +25,15 @@
             </Grid.RowDefinitions>
 
             <!-- ================= HEADER ================= -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,14">
+            <DockPanel Grid.Row="0" Margin="0,0,0,10">
                 <StackPanel DockPanel.Dock="Left">
                     <TextBlock Text="Network Entities View"
                                FontFamily="Courier New"
-                               FontSize="22"
+                               FontSize="20"
                                FontWeight="Bold"
                                Foreground="{StaticResource UIPrimaryBrush}"/>
 
-                    <TextBlock Text="Table, inline validation, P1 search, P2 filter, add/delete DER entities."
+                    <TextBlock Text="Table, inline validation, P1 search, add/delete DER entities."
                                Foreground="{StaticResource UIMutedTextBrush}"
                                FontSize="13"
                                Margin="0,4,0,0"/>
@@ -80,12 +87,12 @@
 
                 <Border Grid.Column="0"
                         Style="{StaticResource PanelBorderStyle}"
-                        Padding="12"
+                        Padding="8"
                         Margin="0,0,8,0">
                     <StackPanel>
                         <TextBlock Text="{Binding TotalCount}"
                                    FontFamily="Courier New"
-                                   FontSize="26"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                         <TextBlock Text="TOTAL ENTITIES"
                                    Style="{StaticResource MonoLabelText}"/>
@@ -94,12 +101,12 @@
 
                 <Border Grid.Column="1"
                         Style="{StaticResource PanelBorderStyle}"
-                        Padding="12"
+                        Padding="8"
                         Margin="0,0,8,0">
                     <StackPanel>
                         <TextBlock Text="{Binding ValidCount}"
                                    FontFamily="Courier New"
-                                   FontSize="26"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                         <TextBlock Text="VALID 1-5 MW"
                                    Style="{StaticResource MonoLabelText}"/>
@@ -108,12 +115,12 @@
 
                 <Border Grid.Column="2"
                         Style="{StaticResource PanelBorderStyle}"
-                        Padding="12"
+                        Padding="8"
                         Margin="0,0,8,0">
                     <StackPanel>
                         <TextBlock Text="{Binding InvalidCount}"
                                    FontFamily="Courier New"
-                                   FontSize="26"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                         <TextBlock Text="INVALID ALERTS"
                                    Style="{StaticResource MonoLabelText}"/>
@@ -122,11 +129,11 @@
 
                 <Border Grid.Column="3"
                         Style="{StaticResource PanelBorderStyle}"
-                        Padding="12">
+                        Padding="8">
                     <StackPanel>
                         <TextBlock Text="{Binding DisplayedCount}"
                                    FontFamily="Courier New"
-                                   FontSize="26"
+                                   FontSize="24"
                                    FontWeight="Bold"/>
                         <TextBlock Text="DISPLAYED ROWS"
                                    Style="{StaticResource MonoLabelText}"/>
@@ -137,9 +144,9 @@
             <!-- ================= MAIN CONTENT ================= -->
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="18"/>
-                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2.1*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="0.95*"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- ================= LEFT PANEL ================= -->
@@ -168,7 +175,7 @@
                                         BorderThickness="1"
                                         CornerRadius="4"
                                         Padding="5,2">
-                                    <TextBlock Text="P1 + P2"
+                                    <TextBlock Text="P1"
                                                FontFamily="Courier New"
                                                FontSize="10"/>
                                 </Border>
@@ -176,118 +183,55 @@
                         </Border>
 
                         <!-- toolbar -->
-                        <Grid Grid.Row="1" Margin="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- P1 Search -->
-                            <Border Grid.Column="0"
-                                    BorderBrush="{StaticResource UISubtleBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Background="{StaticResource UIBackgroundBrush}"
-                                    Padding="10"
-                                    Margin="0,0,8,0">
+                        <!-- toolbar -->
+                        <Grid Grid.Row="1" Margin="10">
+                            <Border BorderBrush="{StaticResource UISubtleBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Background="{StaticResource UIBackgroundBrush}"
+            Padding="8">
                                 <StackPanel>
                                     <TextBlock Text="P1 Search by"
-                                               Style="{StaticResource MonoLabelText}"
-                                               Margin="0,0,0,8"/>
+                       Style="{StaticResource MonoLabelText}"
+                       Margin="0,0,0,8"/>
 
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                         <RadioButton Content="naziv"
-                                                     IsChecked="{Binding SearchByName, Mode=TwoWay}"
-                                                     ToolTip="Search by entity name"/>
+                             IsChecked="{Binding SearchByName, Mode=TwoWay}"
+                             ToolTip="Search by entity name"/>
 
                                         <RadioButton Content="tip"
-                                                     IsChecked="{Binding SearchByType, Mode=TwoWay}"
-                                                     ToolTip="Search by entity type"/>
+                             IsChecked="{Binding SearchByType, Mode=TwoWay}"
+                             ToolTip="Search by entity type"/>
                                     </StackPanel>
 
                                     <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             ToolTip="Enter partial name or type"
-                                             MinWidth="250"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- P2 Filter -->
-                            <Border Grid.Column="1"
-                                    BorderBrush="{StaticResource UISubtleBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Background="{StaticResource UIBackgroundBrush}"
-                                    Padding="10"
-                                    Margin="8,0,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="P2 Filter"
-                                               Style="{StaticResource MonoLabelText}"
-                                               Margin="0,0,0,8"/>
-
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="1.2*"/>
-                                            <ColumnDefinition Width="1.3*"/>
-                                            <ColumnDefinition Width="0.8*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <ComboBox Grid.Column="0"
-                                                  ItemsSource="{Binding AvailableTypes}"
-                                                  SelectedItem="{Binding FilterType, Mode=TwoWay}"
-                                                  DisplayMemberPath="TypeName"
-                                                  ToolTip="Filter by DER type"
-                                                  Margin="0,0,8,0"/>
-
-                                        <StackPanel Grid.Column="1"
-                                                    Orientation="Horizontal"
-                                                    VerticalAlignment="Center">
-                                            <RadioButton Content="&lt;"
-                                                         IsChecked="{Binding FilterLess, Mode=TwoWay}"
-                                                         ToolTip="ID less than value"/>
-
-                                            <RadioButton Content="&gt;"
-                                                         IsChecked="{Binding FilterGreater, Mode=TwoWay}"
-                                                         ToolTip="ID greater than value"/>
-
-                                            <RadioButton Content="="
-                                                         IsChecked="{Binding FilterEqual, Mode=TwoWay}"
-                                                         ToolTip="ID equal to value"/>
-                                        </StackPanel>
-
-                                        <TextBox Grid.Column="2"
-                                                 Text="{Binding FilterIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 ToolTip="ID condition value"/>
-                                    </Grid>
-
-                                    <Grid Margin="0,10,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <ComboBox Grid.Column="0"
-                                                  ItemsSource="{Binding SavedSearches}"
-                                                  SelectedItem="{Binding SelectedSavedSearch, Mode=TwoWay}"
-                                                  ToolTip="Re-apply saved search"
-                                                  Margin="0,0,8,0"/>
-
-                                        <Button Grid.Column="1"
-                                                Command="{Binding SaveCurrentSearchCommand}"
-                                                Style="{StaticResource BaseButtonStyle}"
-                                                ToolTip="Save current search and filter parameters"
-                                                Padding="10,6">
-                                            <TextBlock Text="Save current"/>
-                                        </Button>
-                                    </Grid>
+                     ToolTip="Enter partial name or type"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
-
                         <!-- table -->
                         <DataGrid Grid.Row="2"
-                                  Margin="12,0,12,12"
-                                  ItemsSource="{Binding DisplayedEntities}"
-                                  SelectedItem="{Binding SelectedEntity, Mode=TwoWay}">
+          Margin="10,0,10,8"
+          ItemsSource="{Binding DisplayedEntities}"
+          SelectedItem="{Binding SelectedEntity, Mode=TwoWay}"
+          HeadersVisibility="Column"
+          RowHeight="36"
+          ColumnHeaderHeight="34"
+          HorizontalGridLinesBrush="{StaticResource UISubtleBorderBrush}"
+          VerticalGridLinesBrush="{StaticResource UISubtleBorderBrush}">
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="{x:Type DataGridColumnHeader}">
+                                    <Setter Property="Background" Value="{StaticResource UIPrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource UIWhiteBrush}"/>
+                                    <Setter Property="FontFamily" Value="Courier New"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="Padding" Value="10,8"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
                             <DataGrid.RowStyle>
                                 <Style TargetType="{x:Type DataGridRow}"
                                        BasedOn="{StaticResource {x:Type DataGridRow}}">
@@ -438,71 +382,75 @@
                             </DockPanel>
                         </Border>
 
-                        <StackPanel Grid.Row="1" Margin="14">
-                            <TextBlock Text="ID*"
+                        <ScrollViewer Grid.Row="1"
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Margin="10">
+                                <TextBlock Text="ID*"
                                        Style="{StaticResource MonoLabelText}"/>
-                            <TextBox Text="{Binding FormEntity.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                <TextBox Text="{Binding FormEntity.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      ToolTip="Unique positive integer ID"/>
-                            <TextBlock Text="{Binding FormEntity.ValidationErrors[Id]}"
+                                <TextBlock Text="{Binding FormEntity.ValidationErrors[Id]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
 
-                            <TextBlock Text="Name*"
+                                <TextBlock Text="Name*"
                                        Style="{StaticResource MonoLabelText}"/>
-                            <TextBox Text="{Binding FormEntity.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                <TextBox Text="{Binding FormEntity.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      ToolTip="Entity name cannot be empty"/>
-                            <TextBlock Text="{Binding FormEntity.ValidationErrors[Name]}"
+                                <TextBlock Text="{Binding FormEntity.ValidationErrors[Name]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
 
-                            <TextBlock Text="Type*"
+                                <TextBlock Text="Type*"
                                        Style="{StaticResource MonoLabelText}"/>
-                            <ComboBox ItemsSource="{Binding AvailableTypes}"
+                                <ComboBox ItemsSource="{Binding AvailableTypes}"
                                       SelectedItem="{Binding FormEntity.EntityType, Mode=TwoWay}"
                                       DisplayMemberPath="TypeName"
                                       ToolTip="Choose Solar Panel or Wind Turbine"/>
-                            <TextBlock Text="{Binding FormEntity.ValidationErrors[EntityType]}"
+                                <TextBlock Text="{Binding FormEntity.ValidationErrors[EntityType]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
 
-                            <TextBlock Text="Initial measured value MW"
+                                <TextBlock Text="Initial measured value MW"
                                        Style="{StaticResource MonoLabelText}"/>
-                            <TextBox Text="{Binding FormEntity.LastMeasurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                <TextBox Text="{Binding FormEntity.LastMeasurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      ToolTip="Initial value. Valid range is 1-5 MW."/>
-                            <TextBlock Text="Valid range for DER production is 1-5 MW. Values outside this range are shown as INVALID."
+                                <TextBlock Text="Valid range for DER production is 1-5 MW. Values outside this range are shown as INVALID."
                                        Foreground="{StaticResource UIMutedTextBrush}"
                                        FontSize="11"
                                        TextWrapping="Wrap"
                                        Margin="0,4,0,16"/>
 
-                            <Button Command="{Binding AddCommand}"
+                                <Button Command="{Binding AddCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     HorizontalAlignment="Right"
                                     ToolTip="Add new DER entity">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Add Entity"/>
-                                    <Border BorderBrush="{StaticResource UIWhiteBrush}"
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Add Entity"/>
+                                        <Border BorderBrush="{StaticResource UIWhiteBrush}"
                                             BorderThickness="1"
                                             CornerRadius="4"
                                             Padding="4,1"
                                             Margin="8,0,0,0">
-                                        <TextBlock Text="Alt+Enter" FontSize="10"/>
-                                    </Border>
-                                </StackPanel>
-                            </Button>
+                                            <TextBlock Text="Alt+Enter" FontSize="10"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Button>
 
-                            <Border BorderBrush="{StaticResource UISubtleBorderBrush}"
+                                <Border BorderBrush="{StaticResource UISubtleBorderBrush}"
                                     BorderThickness="1"
                                     CornerRadius="8"
                                     Background="{StaticResource UIBackgroundBrush}"
                                     Padding="10"
                                     Margin="0,18,0,0">
-                                <TextBlock Text="No MessageBox is used here. Every input has its own validation message, and success/error feedback is displayed through the shell toast."
+                                    <TextBlock Text="No MessageBox is used here. Every input has its own validation message, and success/error feedback is displayed through the shell toast."
                                            TextWrapping="Wrap"
                                            Foreground="{StaticResource UIMutedTextBrush}"
                                            FontSize="12"/>
-                            </Border>
-                        </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
                 </Border>
             </Grid>
