@@ -27,10 +27,12 @@ namespace NetworkService.Model
             get { return entity; }
             set
             {
-                SetProperty(ref entity, value);
-                OnPropertyChanged("IsEmpty");
-                OnPropertyChanged("DisplayName");
-                OnPropertyChanged("HasInvalidEntity");
+                if (SetProperty(ref entity, value))
+                {
+                    OnPropertyChanged("IsEmpty");
+                    OnPropertyChanged("HasInvalidEntity");
+                    OnPropertyChanged("DisplayName");
+                }
             }
         }
 

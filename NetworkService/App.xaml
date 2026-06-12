@@ -21,6 +21,11 @@
         <SolidColorBrush x:Key="UIWhiteBrush" Color="#FFFFFF"/>
         <SolidColorBrush x:Key="UIErrorBrush" Color="#7A1F1F"/>
 		<SolidColorBrush x:Key="UIOverlayBrush" Color="#66000000"/>
+        <SolidColorBrush x:Key="UIToastSuccessBrush" Color="#2E7D32"/>
+        <SolidColorBrush x:Key="UIToastWarningBrush" Color="#B7791F"/>
+        <SolidColorBrush x:Key="UIToastErrorBrush" Color="#B00020"/>
+        <SolidColorBrush x:Key="UIToastInfoBrush" Color="#3A3A3A"/>
+
 
         <!-- ================= FOCUS STYLE ================= -->
         <Style x:Key="KeyboardFocusStyle">

@@ -259,17 +259,20 @@
                                         </Border.Style>
 
                                         <Grid Margin="8">
-                                            <TextBlock Text="{Binding DisplayName, Mode=OneWay}"
-                                                       FontFamily="Courier New"
-                                                       FontSize="10"
-                                                       Foreground="{StaticResource UIMutedTextBrush}"
-                                                       HorizontalAlignment="Left"
-                                                       VerticalAlignment="Top"/>
 
+                                            <!-- SLOT LABEL -->
+                                            <TextBlock Text="{Binding DisplayName, Mode=OneWay}"
+               FontFamily="Courier New"
+               FontSize="10"
+               Foreground="{StaticResource UIMutedTextBrush}"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"/>
+
+                                            <!-- EMPTY SLOT TEXT -->
                                             <TextBlock Text="free canvas"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       Foreground="{StaticResource UIMutedTextBrush}">
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Foreground="{StaticResource UIMutedTextBrush}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="{x:Type TextBlock}">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -282,23 +285,27 @@
                                                 </TextBlock.Style>
                                             </TextBlock>
 
+                                            <!-- ENTITY CARD -->
                                             <Border x:Name="EntityCard"
-                                                    BorderBrush="{StaticResource UIBorderBrush}"
-                                                    BorderThickness="1.5"
-                                                    CornerRadius="8"
-                                                    Background="{StaticResource UIPanelBrush}"
-                                                    Padding="8"
-                                                    Margin="0,18,0,0"
-                                                    Cursor="Hand"
-                                                    PreviewMouseMove="EntityCard_PreviewMouseMove">
+            BorderBrush="{StaticResource UIPrimaryBrush}"
+            BorderThickness="1.5"
+            CornerRadius="8"
+            Background="{StaticResource UIPanelBrush}"
+            Padding="8"
+            Margin="0,18,0,0"
+            Cursor="Hand"
+            PreviewMouseMove="EntityCard_PreviewMouseMove">
+
                                                 <Border.Style>
                                                     <Style TargetType="{x:Type Border}">
-                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
                                                         <Setter Property="Background" Value="{StaticResource UIPanelBrush}"/>
+
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Entity}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <DataTrigger Binding="{Binding IsEmpty}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
                                                             </DataTrigger>
+
                                                             <DataTrigger Binding="{Binding HasInvalidEntity}" Value="True">
                                                                 <Setter Property="Background" Value="{StaticResource UIInvalidBrush}"/>
                                                             </DataTrigger>
@@ -310,32 +317,38 @@
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="42"/>
                                                         <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="32"/>
                                                     </Grid.ColumnDefinitions>
 
+                                                    <!-- DER BADGE -->
                                                     <Border Grid.Column="0"
-                                                            Width="34"
-                                                            Height="34"
-                                                            BorderBrush="{StaticResource UIBorderBrush}"
-                                                            BorderThickness="1.5"
-                                                            CornerRadius="5"
-                                                            VerticalAlignment="Center">
+                    Width="34"
+                    Height="34"
+                    BorderBrush="{StaticResource UIPrimaryBrush}"
+                    BorderThickness="1.5"
+                    CornerRadius="5"
+                    VerticalAlignment="Center">
                                                         <TextBlock Text="DER"
-                                                                   FontFamily="Courier New"
-                                                                   FontSize="10"
-                                                                   FontWeight="Bold"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"/>
+                           FontFamily="Courier New"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
                                                     </Border>
 
-                                                    <StackPanel Grid.Column="1">
+                                                    <!-- ENTITY INFO -->
+                                                    <StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Margin="4,0,4,0">
+
                                                         <TextBlock Text="{Binding Entity.Name, Mode=OneWay}"
-                                                                   FontWeight="Bold"
-                                                                   FontSize="12"/>
+                           FontWeight="Bold"
+                           FontSize="12"
+                           TextTrimming="CharacterEllipsis"/>
 
                                                         <TextBlock FontFamily="Courier New"
-           FontSize="11"
-           Foreground="{StaticResource UIMutedTextBrush}">
+                           FontSize="10"
+                           Foreground="{StaticResource UIMutedTextBrush}">
                                                             <TextBlock.Text>
                                                                 <MultiBinding StringFormat="{}#{0} · {1}">
                                                                     <Binding Path="Entity.Id" Mode="OneWay"/>
@@ -345,20 +358,23 @@
                                                         </TextBlock>
 
                                                         <TextBlock Text="{Binding Entity.StatusText, Mode=OneWay}"
-                                                                   FontFamily="Courier New"
-                                                                   FontSize="11"
-                                                                   FontWeight="Bold"/>
+                           FontFamily="Courier New"
+                           FontSize="10"
+                           FontWeight="Bold"/>
                                                     </StackPanel>
 
+                                                    <!-- CLEAR SLOT BUTTON -->
                                                     <Button Grid.Column="2"
-                                                            Content="×"
-                                                            Width="28"
-                                                            Height="28"
-                                                            Command="{Binding DataContext.ClearSlotCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding Index}"
-                                                            Style="{StaticResource BaseButtonStyle}"
-                                                            Padding="0"
-                                                            ToolTip="Return entity to TreeView"/>
+        Content="×"
+        Width="26"
+        Height="26"
+        Padding="0"
+        FontSize="14"
+        FontWeight="Bold"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        ToolTip="Return entity to TreeView"
+        PreviewMouseLeftButtonDown="ClearSlotButton_PreviewMouseLeftButtonDown"/>
                                                 </Grid>
                                             </Border>
                                         </Grid>

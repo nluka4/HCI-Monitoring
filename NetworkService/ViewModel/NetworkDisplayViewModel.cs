@@ -37,7 +37,7 @@ namespace NetworkService.ViewModel
                 TreeViewGroups.Add(new DERGroup(type.TypeName));
             }
 
-            ClearSlotCommand = new MyICommand<int>(ClearSlot);
+            ClearSlotCommand = new MyICommand<CanvasSlot>(ClearSlot);
             AutoPlaceAllCommand = new MyICommand(AutoPlaceAll);
             ToggleConnectionModeCommand = new MyICommand(ToggleConnectionMode);
             SelectSlotForConnectionCommand = new MyICommand<int>(SelectSlotForConnection);
@@ -59,8 +59,6 @@ namespace NetworkService.ViewModel
 
         public ObservableCollection<Connection> Connections { get; private set; }
 
-        public MyICommand<int> ClearSlotCommand { get; private set; }
-
         public MyICommand AutoPlaceAllCommand { get; private set; }
 
         public MyICommand ToggleConnectionModeCommand { get; private set; }
@@ -68,6 +66,8 @@ namespace NetworkService.ViewModel
         public MyICommand<int> SelectSlotForConnectionCommand { get; private set; }
 
         public MyICommand ClearConnectionSelectionCommand { get; private set; }
+
+        public MyICommand<CanvasSlot> ClearSlotCommand { get; private set; }
 
         public bool IsConnectionMode
         {
@@ -238,42 +238,43 @@ namespace NetworkService.ViewModel
             return true;
         }
 
-        private void ClearSlot(int slotIndex)
+        private void ClearSlot(CanvasSlot slot)
         {
-            if (slotIndex < 0 || slotIndex >= CanvasSlots.Count)
+            if (slot == null || slot.Entity == null)
             {
                 return;
             }
 
-            CanvasSlot slot = CanvasSlots[slotIndex];
-
-            if (slot.Entity == null)
-            {
-                return;
-            }
-
-            DER removedEntity = slot.Entity;
             DER[] previousSlotEntities = SnapshotSlotEntities();
             List<Connection> previousConnections = SnapshotConnections();
 
-            mainWindowViewModel.PushUndo("Remove entity from canvas", delegate
+            mainWindowViewModel.PushUndo("Clear entity from canvas", delegate
             {
                 RestoreSlotEntities(previousSlotEntities);
                 RestoreConnections(previousConnections);
+                RefreshTreeViewGroups();
                 RefreshState();
             });
 
+            DER removedEntity = slot.Entity;
+
             slot.Entity = null;
 
-            RemoveConnectionsForSlot(slotIndex);
+            RemoveInvalidConnections();
+
+            RefreshTreeViewGroups();
             RefreshState();
 
             mainWindowViewModel.ShowToast(
-                "Returned to TreeView",
-                "'" + removedEntity.Name + "' returned to available entities.",
-                "SUCCESS");
+                "Canvas slot cleared",
+                removedEntity.Name + " removed from slot " + (slot.Index + 1) + ".",
+                "INFO");
         }
 
+        public void ClearSlotFromView(CanvasSlot slot)
+        {
+            ClearSlot(slot);
+        }
         private void AutoPlaceAll()
         {
             List<DER> availableEntities = GetAvailableEntities().ToList();
@@ -509,6 +510,8 @@ namespace NetworkService.ViewModel
                 CanvasSlots[i].Entity = snapshot[i];
             }
         }
+
+
 
         private void RestoreConnections(List<Connection> snapshot)
         {

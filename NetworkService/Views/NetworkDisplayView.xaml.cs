@@ -350,5 +350,67 @@ namespace NetworkService.Views
 
             return null;
         }
+
+        private void ClearSlotButton_Click(object sender, RoutedEventArgs e)
+        {
+            CanvasSlot slot = FindCanvasSlotFromVisual(sender as DependencyObject);
+            NetworkDisplayViewModel viewModel = DataContext as NetworkDisplayViewModel;
+
+            if (slot == null || viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.ClearSlotFromView(slot);
+
+            e.Handled = true;
+        }
+
+        private void ClearSlotButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            FrameworkElement element = sender as FrameworkElement;
+
+            if (element == null)
+            {
+                return;
+            }
+
+            CanvasSlot slot = element.DataContext as CanvasSlot;
+            NetworkDisplayViewModel viewModel = DataContext as NetworkDisplayViewModel;
+
+            if (slot == null || viewModel == null)
+            {
+                return;
+            }
+
+            viewModel.ClearSlotFromView(slot);
+
+            DrawConnectionLinesLater();
+
+            e.Handled = true;
+        }
+        private CanvasSlot FindCanvasSlotFromVisual(DependencyObject source)
+        {
+            DependencyObject current = source;
+
+            while (current != null)
+            {
+                FrameworkElement frameworkElement = current as FrameworkElement;
+
+                if (frameworkElement != null)
+                {
+                    CanvasSlot slot = frameworkElement.DataContext as CanvasSlot;
+
+                    if (slot != null)
+                    {
+                        return slot;
+                    }
+                }
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return null;
+        }
     }
 }

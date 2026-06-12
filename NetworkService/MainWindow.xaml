@@ -9,7 +9,9 @@
         MinHeight="720"
         MinWidth="1100"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource UIBackgroundBrush}">
+        Background="{StaticResource UIBackgroundBrush}"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        >
 
 	<Window.Resources>
 		<DataTemplate DataType="{x:Type viewModel:EntitiesViewModel}">
@@ -416,15 +418,17 @@
 						</ScrollViewer>
 					</Border>
 
-					<TextBox Grid.Column="1"
-                             Text="{Binding TerminalInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Background="{StaticResource UIPrimaryBrush}"
-                             Foreground="{StaticResource UIWhiteBrush}"
-                             BorderBrush="{StaticResource UIWhiteBrush}"
-                             CaretBrush="{StaticResource UIWhiteBrush}"
-                             FontFamily="Courier New"
-                             ToolTip="Mini-terminal command input">
-						<TextBox.InputBindings>
+                    <TextBox x:Name="TerminalInputTextBox"
+         Grid.Column="1"
+         Text="{Binding TerminalInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+         Background="{StaticResource UIPrimaryBrush}"
+         Foreground="{StaticResource UIWhiteBrush}"
+         BorderBrush="{StaticResource UIWhiteBrush}"
+         CaretBrush="{StaticResource UIWhiteBrush}"
+         FontFamily="Courier New"
+         ToolTip="Mini-terminal command input"
+         PreviewKeyDown="TerminalInputTextBox_PreviewKeyDown">
+                        <TextBox.InputBindings>
 							<KeyBinding Key="Enter"
                                         Command="{Binding ExecuteTerminalCommand}"/>
 						</TextBox.InputBindings>
@@ -485,6 +489,7 @@
 		</Border>
 
 		<!-- ================= TOAST ================= -->
+        <!-- ================= TOAST ================= -->
         <Border Grid.Row="0"
         Grid.RowSpan="4"
         Panel.ZIndex="1000"
@@ -493,57 +498,174 @@
         BorderBrush="{StaticResource UIBorderBrush}"
         BorderThickness="2"
         CornerRadius="10"
-        Padding="14"
+        Padding="0"
         HorizontalAlignment="Right"
         VerticalAlignment="Bottom"
-        Margin="0,0,24,24">
+        Margin="0,0,24,24"
+        IsHitTestVisible="{Binding IsToastVisible}"
+        Opacity="0">
+
+            <Border.RenderTransform>
+                <TranslateTransform X="430"/>
+            </Border.RenderTransform>
+
             <Border.Style>
-				<Style TargetType="{x:Type Border}">
-					<Setter Property="Visibility" Value="Collapsed"/>
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding IsToastVisible}" Value="True">
-							<Setter Property="Visibility" Value="Visible"/>
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Opacity" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsToastVisible}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 To="1"
+                                                 Duration="0:0:0.22"/>
 
-			<StackPanel>
-				<DockPanel LastChildFill="False">
-					<TextBlock DockPanel.Dock="Left"
-                               Text="{Binding ToastTitle}"
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="0"
+                                                 Duration="0:0:0.22">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 To="0"
+                                                 Duration="0:0:0.22"/>
+
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="430"
+                                                 Duration="0:0:0.22">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseIn"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- STATUS COLOR BAR -->
+                <Border Grid.Column="0"
+                CornerRadius="8,0,0,8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{StaticResource UIToastInfoBrush}"/>
+
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ToastType}" Value="SUCCESS">
+                                    <Setter Property="Background" Value="{StaticResource UIToastSuccessBrush}"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding ToastType}" Value="WARNING">
+                                    <Setter Property="Background" Value="{StaticResource UIToastWarningBrush}"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding ToastType}" Value="ERROR">
+                                    <Setter Property="Background" Value="{StaticResource UIToastErrorBrush}"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding ToastType}" Value="INFO">
+                                    <Setter Property="Background" Value="{StaticResource UIToastInfoBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <!-- CONTENT -->
+                <StackPanel Grid.Column="1"
+                    Margin="14,12,14,12">
+
+                    <DockPanel Margin="0,0,0,6">
+                        <TextBlock Text="{Binding ToastTitle}"
+                           FontFamily="Courier New"
+                           FontSize="15"
+                           FontWeight="Bold"
+                           Foreground="{StaticResource UIPrimaryBrush}"
+                           DockPanel.Dock="Left"/>
+
+                        <Border DockPanel.Dock="Right"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="5,1">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="{StaticResource UIToastInfoBrush}"/>
+
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ToastType}" Value="SUCCESS">
+                                            <Setter Property="BorderBrush" Value="{StaticResource UIToastSuccessBrush}"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding ToastType}" Value="WARNING">
+                                            <Setter Property="BorderBrush" Value="{StaticResource UIToastWarningBrush}"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding ToastType}" Value="ERROR">
+                                            <Setter Property="BorderBrush" Value="{StaticResource UIToastErrorBrush}"/>
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding ToastType}" Value="INFO">
+                                            <Setter Property="BorderBrush" Value="{StaticResource UIToastInfoBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <TextBlock Text="{Binding ToastType}"
                                FontFamily="Courier New"
-                               FontWeight="Bold"
-                               FontSize="15"/>
+                               FontSize="10"
+                               FontWeight="Bold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource UIToastInfoBrush}"/>
 
-					<Border DockPanel.Dock="Right"
-                            BorderBrush="{StaticResource UIPrimaryBrush}"
-                            BorderThickness="1"
-                            CornerRadius="4"
-                            Padding="5,2">
-						<TextBlock Text="{Binding ToastType}"
-                                   FontFamily="Courier New"
-                                   FontSize="10"/>
-					</Border>
-				</DockPanel>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ToastType}" Value="SUCCESS">
+                                                <Setter Property="Foreground" Value="{StaticResource UIToastSuccessBrush}"/>
+                                            </DataTrigger>
 
-				<TextBlock Text="{Binding ToastMessage}"
-                           TextWrapping="Wrap"
-                           Foreground="{StaticResource UIMutedTextBrush}"
-                           Margin="0,8,0,12"/>
+                                            <DataTrigger Binding="{Binding ToastType}" Value="WARNING">
+                                                <Setter Property="Foreground" Value="{StaticResource UIToastWarningBrush}"/>
+                                            </DataTrigger>
 
-				<StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right">
-					<Button Content="Dismiss"
-                            Command="{Binding DismissToastCommand}"
-                            Style="{StaticResource BaseButtonStyle}"
-                            Margin="0,0,8,0"/>
+                                            <DataTrigger Binding="{Binding ToastType}" Value="ERROR">
+                                                <Setter Property="Foreground" Value="{StaticResource UIToastErrorBrush}"/>
+                                            </DataTrigger>
 
-					<Button Content="Undo"
-                            Command="{Binding UndoCommand}"
-                            Style="{StaticResource BaseButtonStyle}"/>
-				</StackPanel>
-			</StackPanel>
-		</Border>
-	</Grid>
+                                            <DataTrigger Binding="{Binding ToastType}" Value="INFO">
+                                                <Setter Property="Foreground" Value="{StaticResource UIToastInfoBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </DockPanel>
+
+                    <TextBlock Text="{Binding ToastMessage}"
+                       TextWrapping="Wrap"
+                       Foreground="{StaticResource UIMutedTextBrush}"
+                       FontSize="13"
+                       LineHeight="18"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

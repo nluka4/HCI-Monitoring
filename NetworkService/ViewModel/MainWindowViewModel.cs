@@ -5,11 +5,13 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace NetworkService.ViewModel
 {
@@ -17,6 +19,10 @@ namespace NetworkService.ViewModel
     {
         private readonly Stack<UndoItem> undoStack;
         private readonly Stack<string> navigationHistory;
+
+        private readonly List<string> terminalCommandHistory;
+        private readonly string[] terminalCommandKeywords;
+        private int terminalHistoryIndex;
 
         private BindableBase currentViewModel;
         private string terminalInput;
@@ -28,6 +34,7 @@ namespace NetworkService.ViewModel
         private string toastTitle;
         private string toastMessage;
         private string toastType;
+        private readonly DispatcherTimer toastTimer;
 
         private TcpListener tcpListener;
 
@@ -35,6 +42,26 @@ namespace NetworkService.ViewModel
         {
             undoStack = new Stack<UndoItem>();
             navigationHistory = new Stack<string>();
+
+            terminalCommandHistory = new List<string>();
+            terminalHistoryIndex = -1;
+
+            toastTimer = new DispatcherTimer();
+            toastTimer.Interval = TimeSpan.FromSeconds(3);
+            toastTimer.Tick += ToastTimer_Tick;
+            terminalCommandKeywords = new[]
+            {
+    "help",
+    "list",
+    "add",
+    "delete",
+    "search",
+    "filter",
+    "clear",
+    "undo",
+    "nav",
+    "view"
+};
 
             AvailableTypes = new ObservableCollection<DEREntityType>();
             AllEntities = new ObservableCollection<DER>();
@@ -169,7 +196,11 @@ namespace NetworkService.ViewModel
                 ImagePath = "/Resources/Images/wind.png"
             });
         }
-
+        private void ToastTimer_Tick(object sender, EventArgs e)
+        {
+            toastTimer.Stop();
+            IsToastVisible = false;
+        }
         private void LoadInitialEntities()
         {
             DEREntityType solarPanelType = AvailableTypes[0];
@@ -293,7 +324,16 @@ namespace NetworkService.ViewModel
             ToastTitle = title;
             ToastMessage = message;
             ToastType = type;
-            IsToastVisible = true;
+
+            toastTimer.Stop();
+
+            IsToastVisible = false;
+
+            Application.Current.Dispatcher.BeginInvoke(new Action(delegate
+            {
+                IsToastVisible = true;
+                toastTimer.Start();
+            }));
         }
 
         private void DismissToast()
@@ -357,12 +397,204 @@ namespace NetworkService.ViewModel
                 return;
             }
 
+            command = command.Trim();
+
+            AddTerminalCommandToHistory(command);
+
             TerminalInput = string.Empty;
             AddTerminalLine("$ " + command);
 
-            ExecuteTerminalCommandText(command.Trim());
+            ExecuteTerminalCommandText(command);
         }
 
+        private void AddTerminalCommandToHistory(string command)
+        {
+            if (string.IsNullOrWhiteSpace(command))
+            {
+                return;
+            }
+
+            if (terminalCommandHistory.Count == 0 ||
+                terminalCommandHistory[terminalCommandHistory.Count - 1] != command)
+            {
+                terminalCommandHistory.Add(command);
+            }
+
+            if (terminalCommandHistory.Count > 20)
+            {
+                terminalCommandHistory.RemoveAt(0);
+            }
+
+            terminalHistoryIndex = terminalCommandHistory.Count;
+        }
+
+        public void UsePreviousTerminalCommand()
+        {
+            if (terminalCommandHistory.Count == 0)
+            {
+                return;
+            }
+
+            if (terminalHistoryIndex <= 0 || terminalHistoryIndex > terminalCommandHistory.Count)
+            {
+                terminalHistoryIndex = terminalCommandHistory.Count - 1;
+            }
+            else
+            {
+                terminalHistoryIndex--;
+            }
+
+            TerminalInput = terminalCommandHistory[terminalHistoryIndex];
+        }
+
+        public void UseNextTerminalCommand()
+        {
+            if (terminalCommandHistory.Count == 0)
+            {
+                return;
+            }
+
+            if (terminalHistoryIndex < terminalCommandHistory.Count - 1)
+            {
+                terminalHistoryIndex++;
+                TerminalInput = terminalCommandHistory[terminalHistoryIndex];
+                return;
+            }
+
+            terminalHistoryIndex = terminalCommandHistory.Count;
+            TerminalInput = string.Empty;
+        }
+
+        public void AutocompleteTerminalCommand()
+        {
+            string input = TerminalInput;
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return;
+            }
+
+            string trimmedInput = input.Trim();
+
+            string completed = TryCompleteNavigationCommand(trimmedInput);
+
+            if (completed != null)
+            {
+                TerminalInput = completed;
+                return;
+            }
+
+            completed = TryCompleteFilterCommand(trimmedInput);
+
+            if (completed != null)
+            {
+                TerminalInput = completed;
+                return;
+            }
+
+            completed = TryCompleteBaseCommand(trimmedInput);
+
+            if (completed != null)
+            {
+                TerminalInput = completed;
+            }
+        }
+
+        private string TryCompleteBaseCommand(string input)
+        {
+            if (input.Contains(" "))
+            {
+                return null;
+            }
+
+            List<string> matches = terminalCommandKeywords
+                .Where(command => command.StartsWith(input, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matches.Count == 1)
+            {
+                return matches[0] + " ";
+            }
+
+            if (matches.Count > 1)
+            {
+                AddTerminalLine("autocomplete: " + string.Join(", ", matches));
+            }
+
+            return null;
+        }
+
+        private string TryCompleteNavigationCommand(string input)
+        {
+            string[] parts = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length != 2)
+            {
+                return null;
+            }
+
+            string command = parts[0].ToLower();
+
+            if (command != "nav" && command != "view")
+            {
+                return null;
+            }
+
+            string partialView = parts[1];
+
+            string[] views = { "entities", "display", "graph" };
+
+            List<string> matches = views
+                .Where(view => view.StartsWith(partialView, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matches.Count == 1)
+            {
+                return command + " " + matches[0];
+            }
+
+            if (matches.Count > 1)
+            {
+                AddTerminalLine("autocomplete views: " + string.Join(", ", matches));
+            }
+
+            return null;
+        }
+
+        private string TryCompleteFilterCommand(string input)
+        {
+            string[] parts = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length != 3)
+            {
+                return null;
+            }
+
+            if (parts[0].ToLower() != "filter" || parts[1].ToLower() != "type")
+            {
+                return null;
+            }
+
+            string partialType = parts[2];
+
+            string[] types = { "solar", "wind" };
+
+            List<string> matches = types
+                .Where(type => type.StartsWith(partialType, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matches.Count == 1)
+            {
+                return "filter type " + matches[0];
+            }
+
+            if (matches.Count > 1)
+            {
+                AddTerminalLine("autocomplete types: " + string.Join(", ", matches));
+            }
+
+            return null;
+        }
         private void ExecuteTerminalCommandText(string command)
         {
             string[] parts = command.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -491,6 +723,8 @@ namespace NetworkService.ViewModel
             AddTerminalLine("  nav entities|display|graph");
             AddTerminalLine("  undo");
             AddTerminalLine("  clear");
+            AddTerminalLine("  Tab       -> autocomplete command");
+            AddTerminalLine("  Up/Down   -> command history");
         }
 
         private void PrintEntities()
