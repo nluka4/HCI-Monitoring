@@ -20,7 +20,11 @@
 			<views:NetworkDisplayView/>
 		</DataTemplate>
 
-		<DataTemplate DataType="{x:Type viewModel:PlaceholderViewModel}">
+        <DataTemplate DataType="{x:Type viewModel:GraphViewModel}">
+            <views:GraphView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:PlaceholderViewModel}">
 			<Grid Background="{StaticResource UIBackgroundBrush}" Margin="18">
 				<Border Style="{StaticResource PanelBorderStyle}"
                         Padding="28"

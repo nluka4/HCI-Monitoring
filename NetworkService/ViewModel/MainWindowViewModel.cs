@@ -46,6 +46,8 @@ namespace NetworkService.ViewModel
 
             NetworkDisplayViewModel = new NetworkDisplayViewModel(this, AllEntities, AvailableTypes);
 
+            GraphViewModel = new GraphViewModel(AllEntities);
+
 
             DisplayPlaceholderViewModel = new PlaceholderViewModel(
                 "Network Display View",
@@ -72,6 +74,8 @@ namespace NetworkService.ViewModel
             CreateListener();
         }
         public NetworkDisplayViewModel NetworkDisplayViewModel { get; private set; }
+
+        public GraphViewModel GraphViewModel { get; private set; }
         public ObservableCollection<DER> AllEntities { get; private set; }
 
         public ObservableCollection<DEREntityType> AvailableTypes { get; private set; }
@@ -197,7 +201,8 @@ namespace NetworkService.ViewModel
                     break;
 
                 case "graph":
-                    CurrentViewModel = GraphPlaceholderViewModel;
+                    CurrentViewModel = GraphViewModel;
+                    GraphViewModel.RefreshChartData();
                     break;
 
                 default:
@@ -240,7 +245,8 @@ namespace NetworkService.ViewModel
                     break;
 
                 case "graph":
-                    CurrentViewModel = GraphPlaceholderViewModel;
+                    CurrentViewModel = GraphViewModel;
+                    GraphViewModel.RefreshChartData();
                     break;
             }
 
@@ -279,6 +285,7 @@ namespace NetworkService.ViewModel
         {
             EntitiesViewModel.RefreshDisplayedEntities();
             NetworkDisplayViewModel.RefreshState();
+            GraphViewModel.RefreshChartData();
         }
 
         public void ShowToast(string title, string message, string type)
