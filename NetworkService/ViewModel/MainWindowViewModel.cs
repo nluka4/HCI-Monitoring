@@ -187,13 +187,11 @@ namespace NetworkService.ViewModel
             AvailableTypes.Add(new DEREntityType
             {
                 TypeName = "Solar Panel",
-                ImagePath = "/Resources/Images/solar.png"
             });
 
             AvailableTypes.Add(new DEREntityType
             {
                 TypeName = "Wind Turbine",
-                ImagePath = "/Resources/Images/wind.png"
             });
         }
         private void ToastTimer_Tick(object sender, EventArgs e)
