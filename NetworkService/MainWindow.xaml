@@ -3,16 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:viewModel="clr-namespace:NetworkService.ViewModel"
         xmlns:views="clr-namespace:NetworkService.Views"
+        xmlns:infra="clr-namespace:NetworkService.Infrastructure"
         Title="NetworkService"
         Height="850"
         Width="1400"
         MinHeight="720"
         MinWidth="1100"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource UIBackgroundBrush}"
-        PreviewKeyDown="Window_PreviewKeyDown"
-        >
-
+        Background="{StaticResource UIBackgroundBrush}">
+   
 	<Window.Resources>
 		<DataTemplate DataType="{x:Type viewModel:EntitiesViewModel}">
 			<views:EntitiesUi/>
@@ -63,6 +62,8 @@
 	</Window.Resources>
 
 	<Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+Alt+T"
+            Command="{Binding OpenTerminalCommand}"/>
 		<KeyBinding Key="D1"
                     Modifiers="Alt"
                     Command="{Binding NavCommand}"
@@ -427,13 +428,24 @@
          CaretBrush="{StaticResource UIWhiteBrush}"
          FontFamily="Courier New"
          ToolTip="Mini-terminal command input"
-         PreviewKeyDown="TerminalInputTextBox_PreviewKeyDown">
+         infra:FocusRequest.Token="{Binding TerminalFocusToken}"
+         infra:FocusRequest.CaretToEnd="True">
+
                         <TextBox.InputBindings>
-							<KeyBinding Key="Enter"
-                                        Command="{Binding ExecuteTerminalCommand}"/>
-						</TextBox.InputBindings>
-					</TextBox>
-				</Grid>
+                            <KeyBinding Key="Enter"
+                    Command="{Binding ExecuteTerminalCommand}"/>
+
+                            <KeyBinding Key="Up"
+                    Command="{Binding UsePreviousTerminalHistoryCommand}"/>
+
+                            <KeyBinding Key="Down"
+                    Command="{Binding UseNextTerminalHistoryCommand}"/>
+
+                            <KeyBinding Key="Tab"
+                    Command="{Binding AutocompleteTerminalInputCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                </Grid>
 			</Grid>
 		</Border>
 

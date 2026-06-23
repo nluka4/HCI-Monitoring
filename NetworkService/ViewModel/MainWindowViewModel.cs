@@ -30,6 +30,8 @@ namespace NetworkService.ViewModel
         private bool isTerminalExpanded;
         private bool isShortcutOverlayVisible;
 
+        private int terminalFocusToken;
+
         private bool isToastVisible;
         private string toastTitle;
         private string toastMessage;
@@ -49,19 +51,20 @@ namespace NetworkService.ViewModel
             toastTimer = new DispatcherTimer();
             toastTimer.Interval = TimeSpan.FromSeconds(3);
             toastTimer.Tick += ToastTimer_Tick;
+
             terminalCommandKeywords = new[]
             {
-    "help",
-    "list",
-    "add",
-    "delete",
-    "search",
-    "filter",
-    "clear",
-    "undo",
-    "nav",
-    "view"
-};
+                "help",
+                "list",
+                "add",
+                "delete",
+                "search",
+                "filter",
+                "clear",
+                "undo",
+                "nav",
+                "view"
+            };
 
             AvailableTypes = new ObservableCollection<DEREntityType>();
             AllEntities = new ObservableCollection<DER>();
@@ -70,11 +73,8 @@ namespace NetworkService.ViewModel
             LoadInitialEntities();
 
             EntitiesViewModel = new EntitiesViewModel(this, AllEntities, AvailableTypes);
-
             NetworkDisplayViewModel = new NetworkDisplayViewModel(this, AllEntities, AvailableTypes);
-
             GraphViewModel = new GraphViewModel(AllEntities);
-
 
             DisplayPlaceholderViewModel = new PlaceholderViewModel(
                 "Network Display View",
@@ -87,10 +87,17 @@ namespace NetworkService.ViewModel
             NavCommand = new MyICommand<string>(Navigate);
             BackCommand = new MyICommand(GoBack);
             UndoCommand = new MyICommand(Undo);
+
             ToggleTerminalCommand = new MyICommand(ToggleTerminal);
+            OpenTerminalCommand = new MyICommand(OpenTerminalAndRequestFocus);
+
             ToggleShortcutOverlayCommand = new MyICommand(ToggleShortcutOverlay);
             ExecuteTerminalCommand = new MyICommand(ExecuteTerminalInput);
             DismissToastCommand = new MyICommand(DismissToast);
+
+            UsePreviousTerminalHistoryCommand = new MyICommand(UsePreviousTerminalAndRequestFocus);
+            UseNextTerminalHistoryCommand = new MyICommand(UseNextTerminalAndRequestFocus);
+            AutocompleteTerminalInputCommand = new MyICommand(AutocompleteTerminalAndRequestFocus);
 
             TerminalOutput = "NetworkService terminal ready. Type 'help' for commands.";
             IsTerminalExpanded = true;
@@ -100,9 +107,11 @@ namespace NetworkService.ViewModel
 
             CreateListener();
         }
+
         public NetworkDisplayViewModel NetworkDisplayViewModel { get; private set; }
 
         public GraphViewModel GraphViewModel { get; private set; }
+
         public ObservableCollection<DER> AllEntities { get; private set; }
 
         public ObservableCollection<DEREntityType> AvailableTypes { get; private set; }
@@ -121,12 +130,19 @@ namespace NetworkService.ViewModel
 
         public MyICommand ToggleTerminalCommand { get; private set; }
 
+        public MyICommand OpenTerminalCommand { get; private set; }
+
         public MyICommand ToggleShortcutOverlayCommand { get; private set; }
 
         public MyICommand ExecuteTerminalCommand { get; private set; }
 
         public MyICommand DismissToastCommand { get; private set; }
 
+        public MyICommand UsePreviousTerminalHistoryCommand { get; private set; }
+
+        public MyICommand UseNextTerminalHistoryCommand { get; private set; }
+
+        public MyICommand AutocompleteTerminalInputCommand { get; private set; }
 
         public BindableBase CurrentViewModel
         {
@@ -156,6 +172,12 @@ namespace NetworkService.ViewModel
         {
             get { return isShortcutOverlayVisible; }
             set { SetProperty(ref isShortcutOverlayVisible, value); }
+        }
+
+        public int TerminalFocusToken
+        {
+            get { return terminalFocusToken; }
+            private set { SetProperty(ref terminalFocusToken, value); }
         }
 
         public bool IsToastVisible
@@ -194,11 +216,13 @@ namespace NetworkService.ViewModel
                 TypeName = "Wind Turbine",
             });
         }
+
         private void ToastTimer_Tick(object sender, EventArgs e)
         {
             toastTimer.Stop();
             IsToastVisible = false;
         }
+
         private void LoadInitialEntities()
         {
             DEREntityType solarPanelType = AvailableTypes[0];
@@ -342,6 +366,40 @@ namespace NetworkService.ViewModel
         private void ToggleTerminal()
         {
             IsTerminalExpanded = !IsTerminalExpanded;
+
+            if (IsTerminalExpanded)
+            {
+                RequestTerminalFocus();
+            }
+        }
+
+        private void OpenTerminalAndRequestFocus()
+        {
+            IsTerminalExpanded = true;
+            RequestTerminalFocus();
+        }
+
+        private void RequestTerminalFocus()
+        {
+            TerminalFocusToken++;
+        }
+
+        private void UsePreviousTerminalAndRequestFocus()
+        {
+            UsePreviousTerminalCommand();
+            RequestTerminalFocus();
+        }
+
+        private void UseNextTerminalAndRequestFocus()
+        {
+            UseNextTerminalCommand();
+            RequestTerminalFocus();
+        }
+
+        private void AutocompleteTerminalAndRequestFocus()
+        {
+            AutocompleteTerminalCommand();
+            RequestTerminalFocus();
         }
 
         private void ToggleShortcutOverlay()
@@ -403,6 +461,8 @@ namespace NetworkService.ViewModel
             AddTerminalLine("$ " + command);
 
             ExecuteTerminalCommandText(command);
+
+            RequestTerminalFocus();
         }
 
         private void AddTerminalCommandToHistory(string command)
@@ -593,6 +653,7 @@ namespace NetworkService.ViewModel
 
             return null;
         }
+
         private void ExecuteTerminalCommandText(string command)
         {
             string[] parts = command.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

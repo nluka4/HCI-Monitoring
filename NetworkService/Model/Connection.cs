@@ -4,47 +4,40 @@ namespace NetworkService.Model
 {
     public class Connection : BindableBase
     {
-        private int firstSlotIndex;
-        private int secondSlotIndex;
+        private int firstEntityId;
+        private int secondEntityId;
 
         public Connection()
         {
         }
 
-        public Connection(int firstSlotIndex, int secondSlotIndex)
+        public Connection(int firstEntityId, int secondEntityId)
         {
-            FirstSlotIndex = firstSlotIndex;
-            SecondSlotIndex = secondSlotIndex;
+            FirstEntityId = firstEntityId;
+            SecondEntityId = secondEntityId;
         }
 
-        public int FirstSlotIndex
+        public int FirstEntityId
         {
-            get
-            {
-                return firstSlotIndex;
-            }
-            set
-            {
-                SetProperty(ref firstSlotIndex, value);
-            }
+            get { return firstEntityId; }
+            set { SetProperty(ref firstEntityId, value); }
         }
 
-        public int SecondSlotIndex
+        public int SecondEntityId
         {
-            get
-            {
-                return secondSlotIndex;
-            }
-            set
-            {
-                SetProperty(ref secondSlotIndex, value);
-            }
+            get { return secondEntityId; }
+            set { SetProperty(ref secondEntityId, value); }
         }
 
-        public bool Matches(int first, int second)
+        public bool MatchesEntities(int firstId, int secondId)
         {
-            return (FirstSlotIndex == first && SecondSlotIndex == second)
-                   || (FirstSlotIndex == second && SecondSlotIndex == first);
+            return (FirstEntityId == firstId && SecondEntityId == secondId)
+                   || (FirstEntityId == secondId && SecondEntityId == firstId);
+        }
+
+        public bool ContainsEntity(int entityId)
+        {
+            return FirstEntityId == entityId || SecondEntityId == entityId;
         }
     }
 }

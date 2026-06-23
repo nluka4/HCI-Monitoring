@@ -2,8 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource UIBackgroundBrush}"
-             Loaded="UserControl_Loaded"
-             PreviewKeyDown="UserControl_PreviewKeyDown">
+             xmlns:infra="clr-namespace:NetworkService.Infrastructure">
 
     <UserControl.InputBindings>
         <KeyBinding Key="Enter"
@@ -16,6 +15,11 @@
 
         <KeyBinding Key="Delete"
                 Command="{Binding DeleteCommand}" />
+        <KeyBinding Gesture="Ctrl+F"
+                Command="{Binding RequestSearchFocusCommand}"/>
+
+        <KeyBinding Gesture="Alt+A"
+                Command="{Binding RequestAddFormFocusCommand}"/>
     </UserControl.InputBindings>
 
     <Grid>
@@ -60,7 +64,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Click="FocusAddButton_Click"
+                    <Button Command="{Binding RequestAddFormFocusCommand}"
         Style="{StaticResource PrimaryButtonStyle}"
         ToolTip="Focus Add Entity form"
         Margin="8,0,0,0">
@@ -209,7 +213,9 @@
 
                                     <TextBox x:Name="SearchTextBox"
          Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-         ToolTip="Enter partial name or type"/>
+         infra:FocusRequest.FocusOnLoaded="True"
+         infra:FocusRequest.Token="{Binding SearchFocusToken}"
+         infra:FocusRequest.CaretToEnd="True"/>
                                 </StackPanel>
                             </Border>
                         </Grid>
@@ -393,9 +399,9 @@
                                        Style="{StaticResource MonoLabelText}"/>
                                 <TextBox x:Name="AddIdTextBox"
          Text="{Binding FormEntity.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-         ToolTip="Unique positive integer ID"
-         TabIndex="10"
-         PreviewKeyDown="AddFormControl_PreviewKeyDown"/>
+         infra:FocusRequest.Token="{Binding AddFormFocusToken}"
+         infra:FocusRequest.SelectAll="True"
+         infra:EnterKeyNavigation.MoveFocusOnEnter="True"/>
                                 <TextBlock Text="{Binding FormEntity.ValidationErrors[Id]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
@@ -406,7 +412,7 @@
          Text="{Binding FormEntity.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
          ToolTip="Entity name cannot be empty"
          TabIndex="11"
-         PreviewKeyDown="AddFormControl_PreviewKeyDown"/>
+         infra:EnterKeyNavigation.MoveFocusOnEnter="True"/>
                                 <TextBlock Text="{Binding FormEntity.ValidationErrors[Name]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
@@ -419,7 +425,7 @@
           DisplayMemberPath="TypeName"
           ToolTip="Choose Solar Panel or Wind Turbine"
           TabIndex="12"
-          PreviewKeyDown="AddFormControl_PreviewKeyDown"/>
+          infra:EnterKeyNavigation.MoveFocusOnEnter="True"/>
                                 <TextBlock Text="{Binding FormEntity.ValidationErrors[EntityType]}"
                                        Style="{StaticResource ErrorText}"
                                        Margin="0,3,0,12"/>
@@ -430,7 +436,7 @@
          Text="{Binding FormEntity.LastMeasurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
          ToolTip="Initial value. Valid range is 1-5 MW."
          TabIndex="13"
-         PreviewKeyDown="AddFormControl_PreviewKeyDown"/>
+         infra:EnterKeyNavigation.MoveFocusOnEnter="True"/>
                                 <TextBlock Text="Valid range for DER production is 1-5 MW. Values outside this range are shown as INVALID."
                                        Foreground="{StaticResource UIMutedTextBrush}"
                                        FontSize="11"

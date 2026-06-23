@@ -2,9 +2,15 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:model="clr-namespace:NetworkService.Model"
-             Background="{StaticResource UIBackgroundBrush}"
-             Loaded="UserControl_Loaded"
-             SizeChanged="UserControl_SizeChanged">
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:infra="clr-namespace:NetworkService.Infrastructure"
+             xmlns:controls="clr-namespace:NetworkService.Controls"
+             Background="{StaticResource UIBackgroundBrush}">
+
+    <UserControl.Resources>
+        <infra:BindingProxy x:Key="VmProxy"
+                            Data="{Binding}"/>
+    </UserControl.Resources>
 
     <Grid Margin="18">
         <Grid.RowDefinitions>
@@ -21,14 +27,15 @@
                            FontWeight="Bold"/>
 
                 <TextBlock Text="TreeView grouped by DER type, 12 canvas slots, drag &amp; drop and entity connections."
-           Foreground="{StaticResource UIMutedTextBrush}"
-           FontSize="13"
-           Margin="0,4,0,0"/>
+                           Foreground="{StaticResource UIMutedTextBrush}"
+                           FontSize="13"
+                           Margin="0,4,0,0"/>
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
+
                 <Button Command="{Binding AutoPlaceAllCommand}"
                         Style="{StaticResource BaseButtonStyle}"
                         ToolTip="Automatically place available entities into free slots"
@@ -52,11 +59,11 @@
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding ClearConnectionSelectionCommand}"
+                <Button Command="{Binding ClearCanvasCommand}"
                         Style="{StaticResource BaseButtonStyle}"
-                        ToolTip="Clear selected connection start slot"
+                        ToolTip="Remove all entities and connections from canvas"
                         Margin="8,0,0,0">
-                    <TextBlock Text="Clear selection"/>
+                    <TextBlock Text="Clear canvas"/>
                 </Button>
             </StackPanel>
         </DockPanel>
@@ -94,7 +101,7 @@
                                     BorderThickness="1"
                                     CornerRadius="4"
                                     Padding="5,2">
-                                <TextBlock Text="Drag → Canvas"
+                                <TextBlock Text="Drag"
                                            FontFamily="Courier New"
                                            FontSize="10"/>
                             </Border>
@@ -106,9 +113,10 @@
                               ItemsSource="{Binding TreeViewGroups}"
                               Background="{StaticResource UIPanelBrush}"
                               BorderThickness="0"
-                              Margin="10"
-                              PreviewMouseMove="EntitiesTreeView_PreviewMouseMove">
+                              Margin="10">
+
                         <TreeView.Resources>
+
                             <HierarchicalDataTemplate DataType="{x:Type model:DERGroup}"
                                                       ItemsSource="{Binding Entities}">
                                 <TextBlock Text="{Binding GroupName}"
@@ -125,6 +133,11 @@
                                         Padding="8"
                                         Margin="0,4"
                                         Cursor="Hand">
+
+                                    <i:Interaction.Behaviors>
+                                        <infra:DragSourceBehavior/>
+                                    </i:Interaction.Behaviors>
+
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="38"/>
@@ -150,16 +163,22 @@
                                                        FontWeight="Bold"
                                                        FontSize="12"/>
 
-                                            <TextBlock FontFamily="Courier New"
-           FontSize="11"
-           Foreground="{StaticResource UIMutedTextBrush}">
-                                                <TextBlock.Text>
-                                                    <MultiBinding StringFormat="{}{0} · {1}">
-                                                        <Binding Path="Id" Mode="OneWay"/>
-                                                        <Binding Path="TypeName" Mode="OneWay"/>
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Id, Mode=OneWay}"
+                                                           FontFamily="Courier New"
+                                                           FontSize="11"
+                                                           Foreground="{StaticResource UIMutedTextBrush}"/>
+
+                                                <TextBlock Text=" · "
+                                                           FontFamily="Courier New"
+                                                           FontSize="11"
+                                                           Foreground="{StaticResource UIMutedTextBrush}"/>
+
+                                                <TextBlock Text="{Binding TypeName, Mode=OneWay}"
+                                                           FontFamily="Courier New"
+                                                           FontSize="11"
+                                                           Foreground="{StaticResource UIMutedTextBrush}"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -218,13 +237,11 @@
                           x:Name="CanvasArea"
                           Background="{StaticResource UIBackgroundBrush}"
                           Margin="12">
-                        <Canvas x:Name="LineCanvas"
-                                IsHitTestVisible="False"
-                                Panel.ZIndex="0"/>
 
                         <ItemsControl x:Name="SlotsItemsControl"
                                       ItemsSource="{Binding CanvasSlots}"
                                       Panel.ZIndex="1">
+
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="3" Columns="4"/>
@@ -236,19 +253,25 @@
                                     <Border x:Name="SlotBorder"
                                             Tag="{Binding Index}"
                                             Margin="6"
-                                            BorderBrush="{StaticResource UISubtleBorderBrush}"
                                             BorderThickness="2"
                                             CornerRadius="10"
-                                            Background="{StaticResource UIPanelBrush}"
-                                            AllowDrop="True"
-                                            Loaded="SlotBorder_Loaded"
-                                            DragOver="SlotBorder_DragOver"
-                                            Drop="SlotBorder_Drop"
-                                            MouseLeftButtonDown="SlotBorder_MouseLeftButtonDown">
+                                            Background="{StaticResource UIPanelBrush}">
+
+                                        <i:Interaction.Behaviors>
+                                            <infra:DropTargetBehavior
+                                                Command="{Binding Data.PlaceEntityCommand, Source={StaticResource VmProxy}}"/>
+
+                                            <infra:MouseCommandBehavior
+                                                Command="{Binding Data.SelectSlotForConnectionCommand, Source={StaticResource VmProxy}}"
+                                                UseSlotIndexParameter="True"
+                                                MarkHandled="True"/>
+                                        </i:Interaction.Behaviors>
+
                                         <Border.Style>
                                             <Style TargetType="{x:Type Border}">
                                                 <Setter Property="Background" Value="{StaticResource UIPanelBrush}"/>
                                                 <Setter Property="BorderBrush" Value="{StaticResource UISubtleBorderBrush}"/>
+
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding HasInvalidEntity}" Value="True">
                                                         <Setter Property="Background" Value="{StaticResource UIInvalidBrush}"/>
@@ -260,22 +283,21 @@
 
                                         <Grid Margin="8">
 
-                                            <!-- SLOT LABEL -->
                                             <TextBlock Text="{Binding DisplayName, Mode=OneWay}"
-               FontFamily="Courier New"
-               FontSize="10"
-               Foreground="{StaticResource UIMutedTextBrush}"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Top"/>
+                                                       FontFamily="Courier New"
+                                                       FontSize="10"
+                                                       Foreground="{StaticResource UIMutedTextBrush}"
+                                                       HorizontalAlignment="Left"
+                                                       VerticalAlignment="Top"/>
 
-                                            <!-- EMPTY SLOT TEXT -->
                                             <TextBlock Text="free canvas"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Foreground="{StaticResource UIMutedTextBrush}">
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{StaticResource UIMutedTextBrush}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="{x:Type TextBlock}">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
+
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsEmpty}" Value="True">
                                                                 <Setter Property="Visibility" Value="Visible"/>
@@ -285,16 +307,18 @@
                                                 </TextBlock.Style>
                                             </TextBlock>
 
-                                            <!-- ENTITY CARD -->
                                             <Border x:Name="EntityCard"
-            BorderBrush="{StaticResource UIPrimaryBrush}"
-            BorderThickness="1.5"
-            CornerRadius="8"
-            Background="{StaticResource UIPanelBrush}"
-            Padding="8"
-            Margin="0,18,0,0"
-            Cursor="Hand"
-            PreviewMouseMove="EntityCard_PreviewMouseMove">
+                                                    BorderBrush="{StaticResource UIPrimaryBrush}"
+                                                    BorderThickness="1.5"
+                                                    CornerRadius="8"
+                                                    Background="{StaticResource UIPanelBrush}"
+                                                    Padding="8"
+                                                    Margin="0,18,0,0"
+                                                    Cursor="Hand">
+
+                                                <i:Interaction.Behaviors>
+                                                    <infra:DragSourceBehavior UseSlotEntityAsDragData="True"/>
+                                                </i:Interaction.Behaviors>
 
                                                 <Border.Style>
                                                     <Style TargetType="{x:Type Border}">
@@ -320,61 +344,76 @@
                                                         <ColumnDefinition Width="32"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <!-- DER BADGE -->
                                                     <Border Grid.Column="0"
-                    Width="34"
-                    Height="34"
-                    BorderBrush="{StaticResource UIPrimaryBrush}"
-                    BorderThickness="1.5"
-                    CornerRadius="5"
-                    VerticalAlignment="Center">
+                                                            Width="34"
+                                                            Height="34"
+                                                            BorderBrush="{StaticResource UIPrimaryBrush}"
+                                                            BorderThickness="1.5"
+                                                            CornerRadius="5"
+                                                            VerticalAlignment="Center">
                                                         <TextBlock Text="DER"
-                           FontFamily="Courier New"
-                           FontSize="10"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                                                                   FontFamily="Courier New"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
                                                     </Border>
 
-                                                    <!-- ENTITY INFO -->
                                                     <StackPanel Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Margin="4,0,4,0">
+                                                                VerticalAlignment="Center"
+                                                                Margin="4,0,4,0">
 
                                                         <TextBlock Text="{Binding Entity.Name, Mode=OneWay}"
-                           FontWeight="Bold"
-                           FontSize="12"
-                           TextTrimming="CharacterEllipsis"/>
+                                                                   FontWeight="Bold"
+                                                                   FontSize="12"
+                                                                   TextTrimming="CharacterEllipsis"/>
 
-                                                        <TextBlock FontFamily="Courier New"
-                           FontSize="10"
-                           Foreground="{StaticResource UIMutedTextBrush}">
-                                                            <TextBlock.Text>
-                                                                <MultiBinding StringFormat="{}#{0} · {1}">
-                                                                    <Binding Path="Entity.Id" Mode="OneWay"/>
-                                                                    <Binding Path="Entity.FormattedMeasurement" Mode="OneWay"/>
-                                                                </MultiBinding>
-                                                            </TextBlock.Text>
-                                                        </TextBlock>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="#"
+                                                                       FontFamily="Courier New"
+                                                                       FontSize="10"
+                                                                       Foreground="{StaticResource UIMutedTextBrush}"/>
+
+                                                            <TextBlock Text="{Binding Entity.Id, Mode=OneWay}"
+                                                                       FontFamily="Courier New"
+                                                                       FontSize="10"
+                                                                       Foreground="{StaticResource UIMutedTextBrush}"/>
+
+                                                            <TextBlock Text=" · "
+                                                                       FontFamily="Courier New"
+                                                                       FontSize="10"
+                                                                       Foreground="{StaticResource UIMutedTextBrush}"/>
+
+                                                            <TextBlock Text="{Binding Entity.FormattedMeasurement, Mode=OneWay}"
+                                                                       FontFamily="Courier New"
+                                                                       FontSize="10"
+                                                                       Foreground="{StaticResource UIMutedTextBrush}"/>
+                                                        </StackPanel>
 
                                                         <TextBlock Text="{Binding Entity.StatusText, Mode=OneWay}"
-                           FontFamily="Courier New"
-                           FontSize="10"
-                           FontWeight="Bold"/>
+                                                                   FontFamily="Courier New"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"/>
                                                     </StackPanel>
 
-                                                    <!-- CLEAR SLOT BUTTON -->
                                                     <Button Grid.Column="2"
-        Content="×"
-        Width="26"
-        Height="26"
-        Padding="0"
-        FontSize="14"
-        FontWeight="Bold"
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        ToolTip="Return entity to TreeView"
-        PreviewMouseLeftButtonDown="ClearSlotButton_PreviewMouseLeftButtonDown"/>
+                                                            Content="×"
+                                                            Width="26"
+                                                            Height="26"
+                                                            Padding="0"
+                                                            FontSize="14"
+                                                            FontWeight="Bold"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip="Return entity to TreeView">
+
+                                                        <i:Interaction.Behaviors>
+                                                            <infra:MouseCommandBehavior
+                                                                UsePreviewEvent="True"
+                                                                MarkHandled="True"
+                                                                Command="{Binding Data.ClearSlotCommand, Source={StaticResource VmProxy}}"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </Button>
                                                 </Grid>
                                             </Border>
                                         </Grid>
@@ -382,6 +421,16 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <controls:ConnectionLinesControl
+                            Connections="{Binding Connections}"
+                            CanvasSlots="{Binding CanvasSlots}"
+                            Rows="3"
+                            Columns="4"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            IsHitTestVisible="False"
+                            Panel.ZIndex="50"/>
                     </Grid>
 
                     <Border Grid.Row="2"

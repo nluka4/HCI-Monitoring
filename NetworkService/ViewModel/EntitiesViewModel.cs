@@ -30,6 +30,7 @@ namespace NetworkService.ViewModel
         private bool isDeleteConfirmationVisible;
         private string deleteConfirmationText;
 
+
         public EntitiesViewModel(
             MainWindowViewModel mainWindowViewModel,
             ObservableCollection<DER> allEntities,
@@ -51,6 +52,8 @@ namespace NetworkService.ViewModel
             CancelDeleteCommand = new MyICommand(CancelDelete);
             ClearFiltersCommand = new MyICommand(ClearFilters);
             SaveCurrentSearchCommand = new MyICommand(SaveCurrentSearch);
+            RequestSearchFocusCommand = new MyICommand(RequestSearchFocus);
+            RequestAddFormFocusCommand = new MyICommand(RequestAddFormFocus);
 
             FormEntity = new DER();
 
@@ -82,6 +85,24 @@ namespace NetworkService.ViewModel
 
         public MyICommand SaveCurrentSearchCommand { get; private set; }
 
+        private int searchFocusToken;
+        private int addFormFocusToken;
+
+        public MyICommand RequestSearchFocusCommand { get; private set; }
+
+        public MyICommand RequestAddFormFocusCommand { get; private set; }
+
+        public int SearchFocusToken
+        {
+            get { return searchFocusToken; }
+            private set { SetProperty(ref searchFocusToken, value); }
+        }
+
+        public int AddFormFocusToken
+        {
+            get { return addFormFocusToken; }
+            private set { SetProperty(ref addFormFocusToken, value); }
+        }
         public DER SelectedEntity
         {
             get { return selectedEntity; }
@@ -647,6 +668,16 @@ namespace NetworkService.ViewModel
             return null;
         }
 
+        private void RequestSearchFocus()
+        {
+            SearchFocusToken++;
+        }
+
+        private void RequestAddFormFocus()
+        {
+            AddFormFocusToken++;
+        }
+
         private void ResetForm()
         {
             FormEntity = new DER();
@@ -659,5 +690,7 @@ namespace NetworkService.ViewModel
             OnPropertyChanged("InvalidCount");
             OnPropertyChanged("DisplayedCount");
         }
+
+       
     }
 }

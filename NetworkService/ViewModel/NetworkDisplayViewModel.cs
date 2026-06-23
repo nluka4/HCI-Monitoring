@@ -13,7 +13,10 @@ namespace NetworkService.ViewModel
         private readonly ObservableCollection<DER> allEntities;
 
         private bool isConnectionMode;
-        private int? selectedConnectionStartSlotIndex;
+
+        // Čuvamo ID entiteta, ne slot index.
+        // Tako veze i selection imaju smisla i kada pomeraš entitete.
+        private int? selectedConnectionStartEntityId;
 
         public NetworkDisplayViewModel(
             MainWindowViewModel mainWindowViewModel,
@@ -27,21 +30,9 @@ namespace NetworkService.ViewModel
             TreeViewGroups = new ObservableCollection<DERGroup>();
             Connections = new ObservableCollection<Connection>();
 
-            for (int i = 0; i < 12; i++)
-            {
-                CanvasSlots.Add(new CanvasSlot(i));
-            }
-
-            foreach (DEREntityType type in availableTypes)
-            {
-                TreeViewGroups.Add(new DERGroup(type.TypeName));
-            }
-
-            ClearSlotCommand = new MyICommand<CanvasSlot>(ClearSlot);
-            AutoPlaceAllCommand = new MyICommand(AutoPlaceAll);
-            ToggleConnectionModeCommand = new MyICommand(ToggleConnectionMode);
-            SelectSlotForConnectionCommand = new MyICommand<int>(SelectSlotForConnection);
-            ClearConnectionSelectionCommand = new MyICommand(ClearConnectionSelection);
+            InitializeSlots();
+            InitializeTreeViewGroups(availableTypes);
+            InitializeCommands();
 
             this.allEntities.CollectionChanged += AllEntitiesCollectionChanged;
 
@@ -53,21 +44,37 @@ namespace NetworkService.ViewModel
             RefreshState();
         }
 
+        // =========================
+        // Collections
+        // =========================
+
         public ObservableCollection<CanvasSlot> CanvasSlots { get; private set; }
 
         public ObservableCollection<DERGroup> TreeViewGroups { get; private set; }
 
         public ObservableCollection<Connection> Connections { get; private set; }
 
+        // =========================
+        // Commands
+        // =========================
+
         public MyICommand AutoPlaceAllCommand { get; private set; }
 
         public MyICommand ToggleConnectionModeCommand { get; private set; }
 
-        public MyICommand<int> SelectSlotForConnectionCommand { get; private set; }
-
         public MyICommand ClearConnectionSelectionCommand { get; private set; }
 
+        public MyICommand ClearCanvasCommand { get; private set; }
+
+        public MyICommand<int> SelectSlotForConnectionCommand { get; private set; }
+
         public MyICommand<CanvasSlot> ClearSlotCommand { get; private set; }
+
+        public MyICommand<EntityDropRequest> PlaceEntityCommand { get; private set; }
+
+        // =========================
+        // State
+        // =========================
 
         public bool IsConnectionMode
         {
@@ -78,11 +85,10 @@ namespace NetworkService.ViewModel
                 {
                     if (!value)
                     {
-                        selectedConnectionStartSlotIndex = null;
+                        selectedConnectionStartEntityId = null;
                     }
 
-                    OnPropertyChanged("ConnectionModeText");
-                    OnPropertyChanged("ConnectionStatusText");
+                    RaiseConnectionUiChanges();
                 }
             }
         }
@@ -101,63 +107,74 @@ namespace NetworkService.ViewModel
                     return "Connection mode is disabled.";
                 }
 
-                if (!selectedConnectionStartSlotIndex.HasValue)
+                if (!selectedConnectionStartEntityId.HasValue)
                 {
                     return "Select first occupied slot.";
                 }
 
-                return "First slot selected: " + (selectedConnectionStartSlotIndex.Value + 1) + ". Select second slot.";
+                DER selectedEntity = FindEntityById(selectedConnectionStartEntityId.Value);
+                int selectedSlotIndex = FindSlotIndexForEntityId(selectedConnectionStartEntityId.Value);
+
+                if (selectedEntity == null || selectedSlotIndex < 0)
+                {
+                    return "Select first occupied slot.";
+                }
+
+                return "First slot selected: " + (selectedSlotIndex + 1) +
+                       " (#" + selectedEntity.Id + " " + selectedEntity.Name + "). Select second slot.";
             }
         }
 
-        private void AllEntitiesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        // =========================
+        // Initialization
+        // =========================
+
+        private void InitializeSlots()
         {
-            if (e.NewItems != null)
+            for (int i = 0; i < 12; i++)
             {
-                foreach (DER entity in e.NewItems)
-                {
-                    entity.PropertyChanged += EntityPropertyChanged;
-                }
+                CanvasSlots.Add(new CanvasSlot(i));
             }
-
-            if (e.OldItems != null)
-            {
-                foreach (DER entity in e.OldItems)
-                {
-                    entity.PropertyChanged -= EntityPropertyChanged;
-                }
-            }
-
-            RemoveDeletedEntitiesFromCanvas();
-            RefreshState();
         }
 
-        private void EntityPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void InitializeTreeViewGroups(ObservableCollection<DEREntityType> availableTypes)
         {
-            if (e.PropertyName == "LastMeasurement" ||
-                e.PropertyName == "IsMeasurementValid" ||
-                e.PropertyName == "StatusText" ||
-                e.PropertyName == "FormattedMeasurement")
+            foreach (DEREntityType type in availableTypes)
             {
-                foreach (CanvasSlot slot in CanvasSlots)
-                {
-                    if (slot.Entity == sender)
-                    {
-                        slot.Entity = slot.Entity;
-                    }
-                }
+                TreeViewGroups.Add(new DERGroup(type.TypeName));
             }
         }
+
+        private void InitializeCommands()
+        {
+            AutoPlaceAllCommand = new MyICommand(AutoPlaceAll);
+            ToggleConnectionModeCommand = new MyICommand(ToggleConnectionMode);
+
+            ClearConnectionSelectionCommand = new MyICommand(ClearConnectionSelection);
+            ClearCanvasCommand = new MyICommand(ClearCanvas);
+
+            SelectSlotForConnectionCommand = new MyICommand<int>(SelectSlotForConnection);
+            ClearSlotCommand = new MyICommand<CanvasSlot>(ClearSlot);
+
+            PlaceEntityCommand = new MyICommand<EntityDropRequest>(
+                PlaceEntityFromDrop,
+                CanPlaceEntityFromDrop);
+        }
+
+        // =========================
+        // External refresh
+        // =========================
 
         public void RefreshState()
         {
             RefreshTreeViewGroups();
             RemoveInvalidConnections();
+            RemoveInvalidConnectionSelection();
 
             OnPropertyChanged("CanvasSlots");
             OnPropertyChanged("TreeViewGroups");
             OnPropertyChanged("Connections");
-            OnPropertyChanged("ConnectionStatusText");
+            RaiseConnectionUiChanges();
         }
 
         private void RefreshTreeViewGroups()
@@ -188,7 +205,81 @@ namespace NetworkService.ViewModel
             }
         }
 
-        public bool PlaceEntity(DER entity, int targetSlotIndex)
+        // =========================
+        // Entity collection events
+        // =========================
+
+        private void AllEntitiesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (DER entity in e.NewItems)
+                {
+                    entity.PropertyChanged += EntityPropertyChanged;
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (DER entity in e.OldItems)
+                {
+                    entity.PropertyChanged -= EntityPropertyChanged;
+                }
+            }
+
+            RemoveDeletedEntitiesFromCanvas();
+            RefreshState();
+        }
+
+        private void EntityPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "LastMeasurement" ||
+                e.PropertyName == "IsMeasurementValid" ||
+                e.PropertyName == "StatusText" ||
+                e.PropertyName == "FormattedMeasurement" ||
+                e.PropertyName == "Name" ||
+                e.PropertyName == "EntityType" ||
+                e.PropertyName == "TypeName")
+            {
+                RefreshTreeViewGroups();
+
+                foreach (CanvasSlot slot in CanvasSlots)
+                {
+                    if (slot.Entity == sender)
+                    {
+                        slot.Entity = slot.Entity;
+                    }
+                }
+
+                RaiseConnectionUiChanges();
+            }
+        }
+
+        // =========================
+        // Place / Move entity
+        // =========================
+
+        private void PlaceEntityFromDrop(EntityDropRequest request)
+        {
+            if (request == null)
+            {
+                return;
+            }
+
+            PlaceEntity(request.Entity, request.TargetSlotIndex);
+        }
+
+        private bool CanPlaceEntityFromDrop(EntityDropRequest request)
+        {
+            if (request == null)
+            {
+                return false;
+            }
+
+            return CanPlaceEntity(request.Entity, request.TargetSlotIndex);
+        }
+
+        public bool CanPlaceEntity(DER entity, int targetSlotIndex)
         {
             if (entity == null)
             {
@@ -202,7 +293,12 @@ namespace NetworkService.ViewModel
 
             CanvasSlot targetSlot = CanvasSlots[targetSlotIndex];
 
-            if (targetSlot.Entity != null && targetSlot.Entity != entity)
+            return targetSlot.Entity == null || targetSlot.Entity == entity;
+        }
+
+        public bool PlaceEntity(DER entity, int targetSlotIndex)
+        {
+            if (!CanPlaceEntity(entity, targetSlotIndex))
             {
                 mainWindowViewModel.ShowToast(
                     "Drop blocked",
@@ -212,14 +308,19 @@ namespace NetworkService.ViewModel
                 return false;
             }
 
+            CanvasSlot targetSlot = CanvasSlots[targetSlotIndex];
+
             int oldSlotIndex = FindSlotIndexForEntity(entity);
+
             DER[] previousSlotEntities = SnapshotSlotEntities();
             List<Connection> previousConnections = SnapshotConnections();
+            int? previousSelectedConnectionStartEntityId = selectedConnectionStartEntityId;
 
             mainWindowViewModel.PushUndo("Place/move entity on canvas", delegate
             {
                 RestoreSlotEntities(previousSlotEntities);
                 RestoreConnections(previousConnections);
+                selectedConnectionStartEntityId = previousSelectedConnectionStartEntityId;
                 RefreshState();
             });
 
@@ -238,6 +339,10 @@ namespace NetworkService.ViewModel
             return true;
         }
 
+        // =========================
+        // Clear one slot
+        // =========================
+
         private void ClearSlot(CanvasSlot slot)
         {
             if (slot == null || slot.Entity == null)
@@ -245,24 +350,29 @@ namespace NetworkService.ViewModel
                 return;
             }
 
+            DER removedEntity = slot.Entity;
+
             DER[] previousSlotEntities = SnapshotSlotEntities();
             List<Connection> previousConnections = SnapshotConnections();
+            int? previousSelectedConnectionStartEntityId = selectedConnectionStartEntityId;
 
             mainWindowViewModel.PushUndo("Clear entity from canvas", delegate
             {
                 RestoreSlotEntities(previousSlotEntities);
                 RestoreConnections(previousConnections);
-                RefreshTreeViewGroups();
+                selectedConnectionStartEntityId = previousSelectedConnectionStartEntityId;
                 RefreshState();
             });
 
-            DER removedEntity = slot.Entity;
-
             slot.Entity = null;
 
-            RemoveInvalidConnections();
+            RemoveConnectionsForEntity(removedEntity.Id);
 
-            RefreshTreeViewGroups();
+            if (selectedConnectionStartEntityId == removedEntity.Id)
+            {
+                selectedConnectionStartEntityId = null;
+            }
+
             RefreshState();
 
             mainWindowViewModel.ShowToast(
@@ -275,6 +385,65 @@ namespace NetworkService.ViewModel
         {
             ClearSlot(slot);
         }
+
+        // =========================
+        // Clear whole canvas
+        // =========================
+
+        private void ClearCanvas()
+        {
+            bool hasEntitiesOnCanvas = CanvasSlots.Any(slot => slot.Entity != null);
+            bool hasConnections = Connections.Count > 0;
+
+            if (!hasEntitiesOnCanvas && !hasConnections)
+            {
+                selectedConnectionStartEntityId = null;
+                RaiseConnectionUiChanges();
+
+                mainWindowViewModel.ShowToast(
+                    "Canvas already clear",
+                    "There are no entities or connections on canvas.",
+                    "INFO");
+
+                mainWindowViewModel.AddTerminalLine("display: canvas already clear");
+
+                return;
+            }
+
+            DER[] previousSlotEntities = SnapshotSlotEntities();
+            List<Connection> previousConnections = SnapshotConnections();
+            int? previousSelectedConnectionStartEntityId = selectedConnectionStartEntityId;
+
+            mainWindowViewModel.PushUndo("Clear canvas", delegate
+            {
+                RestoreSlotEntities(previousSlotEntities);
+                RestoreConnections(previousConnections);
+                selectedConnectionStartEntityId = previousSelectedConnectionStartEntityId;
+                RefreshState();
+            });
+
+            foreach (CanvasSlot slot in CanvasSlots)
+            {
+                slot.Entity = null;
+            }
+
+            Connections.Clear();
+            selectedConnectionStartEntityId = null;
+
+            RefreshState();
+
+            mainWindowViewModel.ShowToast(
+                "Canvas cleared",
+                "All entities and connections were removed from canvas.",
+                "INFO");
+
+            mainWindowViewModel.AddTerminalLine("display: canvas cleared");
+        }
+
+        // =========================
+        // Auto place
+        // =========================
+
         private void AutoPlaceAll()
         {
             List<DER> availableEntities = GetAvailableEntities().ToList();
@@ -302,15 +471,19 @@ namespace NetworkService.ViewModel
 
             DER[] previousSlotEntities = SnapshotSlotEntities();
             List<Connection> previousConnections = SnapshotConnections();
+            int? previousSelectedConnectionStartEntityId = selectedConnectionStartEntityId;
 
             mainWindowViewModel.PushUndo("Auto place all", delegate
             {
                 RestoreSlotEntities(previousSlotEntities);
                 RestoreConnections(previousConnections);
+                selectedConnectionStartEntityId = previousSelectedConnectionStartEntityId;
                 RefreshState();
             });
 
-            int count = availableEntities.Count < freeSlots.Count ? availableEntities.Count : freeSlots.Count;
+            int count = availableEntities.Count < freeSlots.Count
+                ? availableEntities.Count
+                : freeSlots.Count;
 
             for (int i = 0; i < count; i++)
             {
@@ -335,6 +508,10 @@ namespace NetworkService.ViewModel
             return allEntities.Where(entity => !placedIds.Contains(entity.Id));
         }
 
+        // =========================
+        // Connection mode / selection
+        // =========================
+
         private void ToggleConnectionMode()
         {
             IsConnectionMode = !IsConnectionMode;
@@ -346,8 +523,11 @@ namespace NetworkService.ViewModel
 
         private void ClearConnectionSelection()
         {
-            selectedConnectionStartSlotIndex = null;
-            OnPropertyChanged("ConnectionStatusText");
+            selectedConnectionStartEntityId = null;
+
+            RaiseConnectionUiChanges();
+
+            mainWindowViewModel.AddTerminalLine("display: connection selection cleared");
         }
 
         private void SelectSlotForConnection(int slotIndex)
@@ -362,7 +542,9 @@ namespace NetworkService.ViewModel
                 return;
             }
 
-            if (CanvasSlots[slotIndex].Entity == null)
+            CanvasSlot selectedSlot = CanvasSlots[slotIndex];
+
+            if (selectedSlot.Entity == null)
             {
                 mainWindowViewModel.ShowToast(
                     "Connection unavailable",
@@ -372,30 +554,47 @@ namespace NetworkService.ViewModel
                 return;
             }
 
-            if (!selectedConnectionStartSlotIndex.HasValue)
+            DER selectedEntity = selectedSlot.Entity;
+
+            if (!selectedConnectionStartEntityId.HasValue)
             {
-                selectedConnectionStartSlotIndex = slotIndex;
-                OnPropertyChanged("ConnectionStatusText");
+                selectedConnectionStartEntityId = selectedEntity.Id;
+                RaiseConnectionUiChanges();
                 return;
             }
 
-            int firstSlotIndex = selectedConnectionStartSlotIndex.Value;
-            int secondSlotIndex = slotIndex;
+            int firstEntityId = selectedConnectionStartEntityId.Value;
+            int secondEntityId = selectedEntity.Id;
 
-            selectedConnectionStartSlotIndex = null;
+            selectedConnectionStartEntityId = null;
 
-            if (firstSlotIndex == secondSlotIndex)
+            if (firstEntityId == secondEntityId)
             {
                 mainWindowViewModel.ShowToast(
                     "Connection blocked",
                     "Select two different occupied slots.",
                     "INFO");
 
-                OnPropertyChanged("ConnectionStatusText");
+                RaiseConnectionUiChanges();
                 return;
             }
 
-            bool duplicate = Connections.Any(connection => connection.Matches(firstSlotIndex, secondSlotIndex));
+            DER firstEntity = FindEntityById(firstEntityId);
+            DER secondEntity = FindEntityById(secondEntityId);
+
+            if (firstEntity == null || secondEntity == null)
+            {
+                mainWindowViewModel.ShowToast(
+                    "Connection unavailable",
+                    "Both entities must exist.",
+                    "INFO");
+
+                RaiseConnectionUiChanges();
+                return;
+            }
+
+            bool duplicate = Connections.Any(connection =>
+                connection.MatchesEntities(firstEntity.Id, secondEntity.Id));
 
             if (duplicate)
             {
@@ -404,46 +603,41 @@ namespace NetworkService.ViewModel
                     "These two entities are already connected.",
                     "INFO");
 
-                OnPropertyChanged("ConnectionStatusText");
+                RaiseConnectionUiChanges();
                 return;
             }
 
-            Connection newConnection = new Connection(firstSlotIndex, secondSlotIndex);
+            AddConnection(firstEntity, secondEntity);
+        }
+
+        private void AddConnection(DER firstEntity, DER secondEntity)
+        {
+            Connection newConnection = new Connection(firstEntity.Id, secondEntity.Id);
 
             mainWindowViewModel.PushUndo("Draw connection", delegate
             {
                 Connections.Remove(newConnection);
-                OnPropertyChanged("Connections");
+                RaiseConnectionUiChanges();
             });
 
             Connections.Add(newConnection);
 
             mainWindowViewModel.ShowToast(
                 "Connection drawn",
-                "Connection " + (firstSlotIndex + 1) + " ↔ " + (secondSlotIndex + 1) + " created.",
+                "Connection #" + firstEntity.Id + " ↔ #" + secondEntity.Id + " created.",
                 "SUCCESS");
 
-            OnPropertyChanged("ConnectionStatusText");
+            RaiseConnectionUiChanges();
         }
 
-        private int FindSlotIndexForEntity(DER entity)
-        {
-            for (int i = 0; i < CanvasSlots.Count; i++)
-            {
-                if (CanvasSlots[i].Entity == entity)
-                {
-                    return i;
-                }
-            }
+        // =========================
+        // Connection cleanup
+        // =========================
 
-            return -1;
-        }
-
-        private void RemoveConnectionsForSlot(int slotIndex)
+        private void RemoveConnectionsForEntity(int entityId)
         {
             List<Connection> toRemove = Connections
-                .Where(connection => connection.FirstSlotIndex == slotIndex ||
-                                     connection.SecondSlotIndex == slotIndex)
+                .Where(connection => connection.ContainsEntity(entityId))
                 .ToList();
 
             foreach (Connection connection in toRemove)
@@ -454,14 +648,14 @@ namespace NetworkService.ViewModel
 
         private void RemoveInvalidConnections()
         {
+            List<int> existingEntityIds = allEntities
+                .Select(entity => entity.Id)
+                .ToList();
+
             List<Connection> toRemove = Connections
                 .Where(connection =>
-                    connection.FirstSlotIndex < 0 ||
-                    connection.SecondSlotIndex < 0 ||
-                    connection.FirstSlotIndex >= CanvasSlots.Count ||
-                    connection.SecondSlotIndex >= CanvasSlots.Count ||
-                    CanvasSlots[connection.FirstSlotIndex].Entity == null ||
-                    CanvasSlots[connection.SecondSlotIndex].Entity == null)
+                    !existingEntityIds.Contains(connection.FirstEntityId) ||
+                    !existingEntityIds.Contains(connection.SecondEntityId))
                 .ToList();
 
             foreach (Connection connection in toRemove)
@@ -478,11 +672,72 @@ namespace NetworkService.ViewModel
             {
                 if (slot.Entity != null && !existingIds.Contains(slot.Entity.Id))
                 {
+                    int removedEntityId = slot.Entity.Id;
+
                     slot.Entity = null;
-                    RemoveConnectionsForSlot(slot.Index);
+                    RemoveConnectionsForEntity(removedEntityId);
+
+                    if (selectedConnectionStartEntityId == removedEntityId)
+                    {
+                        selectedConnectionStartEntityId = null;
+                    }
                 }
             }
         }
+
+        private void RemoveInvalidConnectionSelection()
+        {
+            if (!selectedConnectionStartEntityId.HasValue)
+            {
+                return;
+            }
+
+            int selectedEntityId = selectedConnectionStartEntityId.Value;
+
+            bool entityStillPlaced = CanvasSlots.Any(slot =>
+                slot.Entity != null && slot.Entity.Id == selectedEntityId);
+
+            if (!entityStillPlaced)
+            {
+                selectedConnectionStartEntityId = null;
+            }
+        }
+
+        // =========================
+        // Find helpers
+        // =========================
+
+        private int FindSlotIndexForEntity(DER entity)
+        {
+            if (entity == null)
+            {
+                return -1;
+            }
+
+            return FindSlotIndexForEntityId(entity.Id);
+        }
+
+        private int FindSlotIndexForEntityId(int entityId)
+        {
+            for (int i = 0; i < CanvasSlots.Count; i++)
+            {
+                if (CanvasSlots[i].Entity != null && CanvasSlots[i].Entity.Id == entityId)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private DER FindEntityById(int entityId)
+        {
+            return allEntities.FirstOrDefault(entity => entity.Id == entityId);
+        }
+
+        // =========================
+        // Undo snapshots
+        // =========================
 
         private DER[] SnapshotSlotEntities()
         {
@@ -499,7 +754,7 @@ namespace NetworkService.ViewModel
         private List<Connection> SnapshotConnections()
         {
             return Connections
-                .Select(connection => new Connection(connection.FirstSlotIndex, connection.SecondSlotIndex))
+                .Select(connection => new Connection(connection.FirstEntityId, connection.SecondEntityId))
                 .ToList();
         }
 
@@ -511,8 +766,6 @@ namespace NetworkService.ViewModel
             }
         }
 
-
-
         private void RestoreConnections(List<Connection> snapshot)
         {
             Connections.Clear();
@@ -521,6 +774,17 @@ namespace NetworkService.ViewModel
             {
                 Connections.Add(connection);
             }
+        }
+
+        // =========================
+        // UI notification helpers
+        // =========================
+
+        private void RaiseConnectionUiChanges()
+        {
+            OnPropertyChanged("ConnectionModeText");
+            OnPropertyChanged("ConnectionStatusText");
+            OnPropertyChanged("Connections");
         }
     }
 }
